@@ -1,9 +1,15 @@
-package keys.services;
+package authorization.services.crypto;
+
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 import java.security.KeyPair;
+import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+
 import java.security.interfaces.RSAPublicKey;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -26,7 +32,7 @@ public class RsaPssService {
             throw new RuntimeException("Error durante la generación de claves criptográficas");
         }
     }
-
+    
     public RSAKey publicKeyToJwk(RSAPublicKey pk) {
         try {
             return new RSAKey.Builder(pk)
@@ -35,6 +41,16 @@ public class RsaPssService {
                 .build();
         } catch (JOSEException e) {
             throw new RuntimeException("Error al mapear la clave pública", e);
+        }
+    }
+
+    public PublicKey bytesToPublicKey(byte[] publicKeyBytes) {
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
+            return keyFactory.generatePublic(keySpec);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException e) {
+            throw new RuntimeException("Error al convertir bytes a clave pública", e);
         }
     }
 }
