@@ -1,10 +1,9 @@
 package authorization.services.crypto;
 
 import java.security.KeyPair;
-import java.security.KeyFactory;
 import java.security.Security;
+import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.UUID;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -16,6 +15,9 @@ import authorization.services.FileService;
 
 @Service
 public class CryptoKeysService {
+    private final String PRIVATE_KEY = "_private.pem";
+    private final String PUBLIC_KEY = "_public.pem";
+
     static {
         Security.addProvider(new BouncyCastleProvider());
     }
@@ -33,17 +35,23 @@ public class CryptoKeysService {
 
     public RSAKey generateElectionKeys(UUID electionId) {
         KeyPair keyPair = rsaPssService.generateKeys();
-        String privateKeyFile = electionId + "_private.pem";
-        String publicKeyFile = electionId + "_public.pem";
+        String privateKeyFile = electionId + PRIVATE_KEY;
+        String publicKeyFile = electionId + PUBLIC_KEY;
         fileService.saveFileToPem(privateKeyFile, "PRIVATE KEY", keyPair.getPrivate().getEncoded());  
         fileService.saveFileToPem(publicKeyFile, "PUBLIC KEY", keyPair.getPublic().getEncoded());
         return rsaPssService.publicKeyToJwk((RSAPublicKey) keyPair.getPublic());
     }
 
-    public RSAKey readPublicKey(UUID electionId) {
-        String publicKeyFile = electionId + "_public.pem";
+    public RSAKey readPublicKeyFromPem(UUID electionId) {
+        String publicKeyFile = electionId + PUBLIC_KEY;
         byte[] publicKeyBytes = fileService.readFileFromPem(publicKeyFile);
         RSAPublicKey publicKey = (RSAPublicKey) rsaPssService.bytesToPublicKey(publicKeyBytes);
         return rsaPssService.publicKeyToJwk(publicKey);
+    }
+
+    public void readPrivateKeyFromPem(UUID electionId) {
+        String privateKeyFile = electionId + PRIVATE_KEY;
+        byte [] privateKeyBytes = fileService.readFileFromPem(privateKeyFile);
+        RSAPrivateCrtKey privateKey = (RSAPrivateCrtKey) rsaPssService.bytesToPrivateKey(privateKeyBytes);
     }
 }

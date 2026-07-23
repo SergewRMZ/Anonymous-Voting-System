@@ -30,7 +30,7 @@ public class CryptoKeyController {
 
     @GetMapping("/{electionId}")
     public ResponseEntity<?> getPublicKey(@PathVariable UUID electionId) {
-        RSAKey jwk = cryptoKeysService.readPublicKey(electionId);
+        RSAKey jwk = cryptoKeysService.readPublicKeyFromPem(electionId);
         return ResponseEntity.ok(jwk.toJSONObject());
     }
     
