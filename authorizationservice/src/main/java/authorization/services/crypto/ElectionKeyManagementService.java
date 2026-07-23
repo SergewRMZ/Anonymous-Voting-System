@@ -21,9 +21,9 @@ public class ElectionKeyManagementService {
         this.keyRepository = keyRepository;
     }
 
-    public RSAKey generateAndStoreElectionKeys(UUID electionId) {
+    public RSAPublicKey generateAndStoreElectionKeys(UUID electionId) {
         KeyPair keyPair = keyGenerator.generateKeyPair();
         keyRepository.saveKeyPair(electionId, keyPair);
-        return JwkMapper.toJwk( (RSAPublicKey) keyPair.getPublic());
+        return (RSAPublicKey) keyPair.getPublic();
     }
 }

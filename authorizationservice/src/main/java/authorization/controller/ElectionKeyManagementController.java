@@ -1,4 +1,5 @@
 package authorization.controller;
+import java.security.interfaces.RSAPublicKey;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -7,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.nimbusds.jose.jwk.RSAKey;
 
-import authorization.services.crypto.CryptoKeysService;
 import authorization.services.crypto.ElectionKeyManagementService;
+import authorization.services.crypto.JwkMapper;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +26,9 @@ public class ElectionKeyManagementController {
 
     @PostMapping("/{electionId}")
     public ResponseEntity<?> generateKeys(@PathVariable UUID electionId) {
-        RSAKey jwk = electionKeyManagementService.generateAndStoreElectionKeys(electionId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(jwk.toJSONObject());
+        RSAPublicKey pk = electionKeyManagementService.generateAndStoreElectionKeys(electionId);
+        RSAKey pkJwk = JwkMapper.toJwk(pk);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pkJwk.toJSONObject());
     }
 
     // @GetMapping("/{electionId}")
