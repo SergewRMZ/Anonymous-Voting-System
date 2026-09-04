@@ -14,6 +14,8 @@ public class AuthorizationPublicKeyMapper {
             .publicKey(entity.getPublicKey())
             .status(entity.getStatus())
             .createdAt(entity.getCreatedAt())
+            .activatedAt(entity.getActivatedAt())
+            .expiredAt(entity.getExpiredAt())
             .build();
     }
 
@@ -25,6 +27,8 @@ public class AuthorizationPublicKeyMapper {
             .publicKey(model.getPublicKey())
             .status(model.getStatus())
             .createdAt(model.getCreatedAt())
+            .activatedAt(model.getActivatedAt())
+            .expiredAt(model.getExpiredAt())
             .build();
     }
 }

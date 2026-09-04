@@ -40,4 +40,10 @@ public class JpaAuthorizationKeysEntity {
 
     @Column(nullable = false)
     private Instant createdAt;
+
+    @Column(nullable = true)
+    private Instant activatedAt;
+
+    @Column(nullable = true)
+    private Instant expiredAt;  
 }

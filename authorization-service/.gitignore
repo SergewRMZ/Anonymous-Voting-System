@@ -35,6 +35,7 @@ build/
 
 ## Sources
 
+README_commands.md
 /keys/
 /postgres/
 .env

@@ -12,10 +12,10 @@ import org.bouncycastle.util.io.pem.PemWriter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import authorization.application.port.out.KeyStoragePort;
+import authorization.application.port.out.PrivateKeyStoragePort;
 
 @Component
-public class KeyStorageAdapter implements KeyStoragePort {
+public class PrivateKeyStorageAdapter implements PrivateKeyStoragePort {
     private final Path keysDirectory;
     private static final String PRIVATE_KEY_EXTENSION = "_private.pem";
 
@@ -23,7 +23,7 @@ public class KeyStorageAdapter implements KeyStoragePort {
      * Constructor for KeyStorageAdapter.
      * @param keysDir The directory where cryptographic keys will be stored.
      */
-    public KeyStorageAdapter(@Value("${app.keys.directory:./keys}") String keysDir) {
+    public PrivateKeyStorageAdapter(@Value("${app.keys.directory:./keys}") String keysDir) {
         this.keysDirectory = Paths.get(keysDir).toAbsolutePath().normalize();
     }
 

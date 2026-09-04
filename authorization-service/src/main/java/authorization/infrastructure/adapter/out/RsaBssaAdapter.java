@@ -9,9 +9,10 @@ import org.springframework.stereotype.Component;
 
 import authorization.application.dto.GenerateKeyPair;
 import authorization.application.port.out.KeyGeneratorPort;
+import authorization.application.port.out.VoteSignerPort;
 
 @Component
-public class RSAKeyGeneratorAdapter implements KeyGeneratorPort {
+public class RsaBssaAdapter implements KeyGeneratorPort, VoteSignerPort {
     private final int N_MODULUS = 3072;
     @Override
     public GenerateKeyPair generate() {
@@ -23,5 +24,11 @@ public class RSAKeyGeneratorAdapter implements KeyGeneratorPort {
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new RuntimeException("Error durante la generación de claves criptográficas");
         }
+    }
+
+    @Override
+    public byte[] signVote(byte[] votePayload, byte[] privateKey) {
+        // Implement the signing logic here
+        return new byte[0]; // Placeholder return value
     }
 }

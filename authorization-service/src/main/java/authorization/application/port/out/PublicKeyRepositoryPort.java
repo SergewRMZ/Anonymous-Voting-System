@@ -4,9 +4,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import authorization.domain.model.AuthorizationPublicKeyModel;
+import authorization.domain.model.KeyStatus;
 
-public interface KeyRepositoryPort {
+public interface PublicKeyRepositoryPort {
     public AuthorizationPublicKeyModel save(AuthorizationPublicKeyModel keyPair);
     public Optional<AuthorizationPublicKeyModel> findByElectionId(UUID electionId);
-
+    public boolean existsKeyByElectionId(UUID electionId, KeyStatus status);
 }

@@ -4,13 +4,14 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
-import authorization.application.port.out.KeyRepositoryPort;
+import authorization.application.port.out.PublicKeyRepositoryPort;
 import authorization.domain.model.AuthorizationPublicKeyModel;
+import authorization.domain.model.KeyStatus;
 import lombok.AllArgsConstructor;
 
 @Repository
 @AllArgsConstructor
-public class JpaKeyRepositoryAdapter implements KeyRepositoryPort {
+public class JpaPublicKeyRepositoryAdapter implements PublicKeyRepositoryPort {
     private final AuthorizationPublicKeyMapper authorizationKeysPersistenceMapper;
     private final SpringDataAuthorizationKeysRepository springDataAuthorizationKeysRepository;
     
@@ -33,5 +34,10 @@ public class JpaKeyRepositoryAdapter implements KeyRepositoryPort {
     public Optional<AuthorizationPublicKeyModel> findByElectionId(UUID electionId) {
         return springDataAuthorizationKeysRepository.findByElectionId(electionId)
             .map(authorizationKeysPersistenceMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsKeyByElectionId(UUID electionId, KeyStatus status) {
+        return springDataAuthorizationKeysRepository.existsByElectionIdAndStatus(electionId, status);
     }
 }
