@@ -1,8 +1,8 @@
 package authorization.application.port.in;
 import java.util.UUID;
 
-import authorization.domain.model.AuthorizationPublicKeyModel;
+import authorization.domain.model.ElectionPublicKeyModel;
 
 public interface CreateAuthorizationKeysUseCase {
-    AuthorizationPublicKeyModel generateKeyPair(UUID electionId);
+    ElectionPublicKeyModel generateKeyPair(UUID electionId);
 }

@@ -4,6 +4,6 @@ import java.util.UUID;
 
 import authorization.domain.model.ElectionPublicKeyModel;
 
-public interface GetAuthorizationPublicKeyUseCase {
-    ElectionPublicKeyModel getByElectionId(UUID electionId);
+public interface ActiveKeyUseCase {
+    public ElectionPublicKeyModel activateKey(UUID electionId);
 }
