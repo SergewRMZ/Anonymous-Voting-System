@@ -14,6 +14,7 @@ public class GatewayConfig {
                 .path("/api/elections/**")
                 .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8080")
-            ).build();
+            )
+            .build();
     }
 }
