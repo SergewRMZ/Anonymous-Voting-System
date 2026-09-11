@@ -22,6 +22,7 @@
         <module>authorization-service</module>
         <module>api-gateway</module>
         <module>bulletin-board</module>
+        <module>authentication-service</module>
     </modules>
 
     <properties>
