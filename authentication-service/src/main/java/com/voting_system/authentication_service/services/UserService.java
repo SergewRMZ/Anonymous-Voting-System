@@ -2,8 +2,6 @@ package com.voting_system.authentication_service.services;
 
 import java.util.Collections;
 
-import javax.management.RuntimeErrorException;
-
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -12,9 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.voting_system.authentication_service.dto.UserRegisterRequestDTO;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Service
