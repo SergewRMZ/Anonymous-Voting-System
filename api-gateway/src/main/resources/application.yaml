@@ -2,5 +2,37 @@ spring:
   application:
     name: api-gateway
 
+  security:
+    oauth2:
+    # CLIENT CONFIGURATION FOR TOKEN RELAY
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8081/realms/voting-system-realm
+        registration:
+          api-gateway-client:
+            provider: keycloak
+            client-id: api-gateway-client
+            client-secret: TU_SECRET_AQUI  # <--- ¡REEMPLAZA ESTO CON TU CÓDIGO!
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+            scope: openid
+
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/voting-system-realm
+
+  cloud:
+    gateway:
+      # Envíar el Token hacía los microservicios
+      default-filters:
+        - TokenRelay
+
+      routes:
+        # Authorization Microservice Path
+        - id: authorization-service
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/elections/**
 server:
   port: 9000
