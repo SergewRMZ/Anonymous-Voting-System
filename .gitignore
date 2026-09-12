@@ -35,4 +35,5 @@ keys/
 postgres/
 .env
 README-docs.md
+instructions.md
 images/

@@ -3,7 +3,10 @@ package com.voting_system.authentication_service.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.voting_system.authentication_service.dto.UserLoginRequestDTO;
+import com.voting_system.authentication_service.dto.UserLoginResponseDTO;
 import com.voting_system.authentication_service.dto.UserRegisterRequestDTO;
+import com.voting_system.authentication_service.dto.UserRegisterResponseDTO;
 import com.voting_system.authentication_service.services.UserService;
 
 import jakarta.validation.Valid;
@@ -22,8 +25,25 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> postMethodName(@Valid @RequestBody UserRegisterRequestDTO request) {
-        String userId = userService.registerUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+    public ResponseEntity<UserRegisterResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO request) {
+        userService.registerVoter(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            UserRegisterResponseDTO.from("User has been registered correctly"));
+    }
+
+    @PostMapping("/admin/create")
+    public ResponseEntity<UserRegisterResponseDTO> createAdmin(@Valid @RequestBody UserRegisterRequestDTO request) {
+        userService.registerAdmin(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            UserRegisterResponseDTO.from("Admin user has been registered correctly")
+        );
+    }
+    
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponseDTO> login(@Valid @RequestBody UserLoginRequestDTO request) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+            UserLoginResponseDTO.from(userService.loginUser(request))
+        );
     }
 }
