@@ -1,10 +1,12 @@
 package com.voting_system.authentication_service.services;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.AccessTokenResponse;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import com.voting_system.authentication_service.dto.UserLoginRequestDTO;
 import com.voting_system.authentication_service.dto.UserRegisterRequestDTO;
+import com.voting_system.authentication_service.exceptions.InternalServerErrorException;
+import com.voting_system.authentication_service.exceptions.UsernameOrEmailAlreadyExistsException;
 import com.voting_system.authentication_service.model.UserRole;
 
 import jakarta.ws.rs.core.Response;
@@ -42,7 +46,17 @@ public class UserService {
 
     public void registerAdmin(UserRegisterRequestDTO request) {
         String userId = createUserInKeycloak(request, true);
-        assignRole(userId, UserRole.ADMIN_ROLE);
+        assignRole(userId, UserRole.ROLE_ADMIN);
+    }
+
+    public void updateVoterStatus(String userId, boolean enabled) {
+        UserResource userResource = keycloak.realm(this.realm).users().get(userId);
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        
+        if(userHasRole(userId, UserRole.ROLE_VOTER)) {
+            userRepresentation.setEnabled(enabled);
+            userResource.update(userRepresentation);
+        }
     }
 
     public String createUserInKeycloak(UserRegisterRequestDTO request, boolean enabledUser) {
@@ -69,11 +83,11 @@ public class UserService {
             }   
 
             else if(response.getStatus() == 409) {
-                throw new RuntimeException("The email user is already registered");
+                throw new UsernameOrEmailAlreadyExistsException();
             }
 
             else {
-                throw new RuntimeException("Internal Server Error");
+                throw new InternalServerErrorException();
             }
         }
     }
@@ -90,6 +104,22 @@ public class UserService {
                 .build()) {
             return userKeycloak.tokenManager().getAccessToken();
         }
+    }
+
+    private boolean userHasRole(String userId, UserRole role) {
+        List<RoleRepresentation> listRoles = keycloak
+            .realm(this.realm)
+            .users()
+            .get(userId)
+            .roles()
+            .realmLevel()
+            .listEffective();
+
+        for(RoleRepresentation roleRepresentation: listRoles) {
+            if(roleRepresentation.getName().equals(role.name())) return true;
+        }
+
+        return false;
     }
 
     private String extractUserId(Response response) {
