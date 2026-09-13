@@ -15,6 +15,11 @@ public class GatewayConfig {
                 .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8080")
             )
+            .route("authentication-service", r -> r
+                .path("/api/auth/**", "/api/users/**")
+                .filters(f -> f.stripPrefix(1))
+                .uri("http://localhost:8082")
+            )
             .build();
     }
 }

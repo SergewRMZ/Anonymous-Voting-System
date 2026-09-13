@@ -41,7 +41,8 @@ public class UserService {
     private String clientSecret;
 
     public void registerVoter(UserRegisterRequestDTO request) {
-        createUserInKeycloak(request, false);
+        String userId = createUserInKeycloak(request, false);
+        assignRole(userId, UserRole.ROLE_VOTER);
     }
 
     public void registerAdmin(UserRegisterRequestDTO request) {
@@ -86,9 +87,13 @@ public class UserService {
                 throw new UsernameOrEmailAlreadyExistsException();
             }
 
-            else {
-                throw new InternalServerErrorException();
-            }
+            String errorBody = response.hasEntity()
+            ? response.readEntity(String.class)
+            : "No response body";
+
+            throw new RuntimeException(
+                "Keycloak returned status " + response.getStatus() + ": " + errorBody
+            );
         }
     }
 
