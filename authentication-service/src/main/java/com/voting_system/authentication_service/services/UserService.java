@@ -97,20 +97,6 @@ public class UserService {
         }
     }
 
-    public AccessTokenResponse loginUser(UserLoginRequestDTO request) {
-        try (Keycloak userKeycloak = KeycloakBuilder.builder()
-                .serverUrl(serverUrl)
-                .realm(realm)
-                .grantType(OAuth2Constants.PASSWORD)
-                .clientId(clientId)
-                .clientSecret(clientSecret)
-                .username(request.username())
-                .password(request.password())
-                .build()) {
-            return userKeycloak.tokenManager().getAccessToken();
-        }
-    }
-
     private boolean userHasRole(String userId, UserRole role) {
         List<RoleRepresentation> listRoles = keycloak
             .realm(this.realm)

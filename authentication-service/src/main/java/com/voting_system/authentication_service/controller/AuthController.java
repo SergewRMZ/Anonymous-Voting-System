@@ -29,11 +29,4 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             UserRegisterResponseDTO.from("User has been registered correctly"));
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<UserLoginResponseDTO> login(@Valid @RequestBody UserLoginRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.OK).body(
-            UserLoginResponseDTO.from(userService.loginUser(request))
-        );
-    }
 }

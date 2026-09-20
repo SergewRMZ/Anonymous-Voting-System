@@ -23,11 +23,20 @@ public class SecurityConfig {
     @Bean 
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity serverHttpSecurity) {
         return serverHttpSecurity
+            // CSRF solo es necesaria cuando se trabaja con cookies
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
+
+                // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                .pathMatchers(HttpMethod.GET, "/api/elections/*/public-key").permitAll()
+
+                // Authenticated endpoints
                 .pathMatchers(HttpMethod.POST, "/api/users/admin").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.POST, "/api/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
+                
+                .pathMatchers(HttpMethod.POST, "/api/elections/*/authorize-vote").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {
