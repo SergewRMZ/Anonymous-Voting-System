@@ -22,7 +22,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RequestMapping("/elections/{electionId}")
+@RequestMapping("/api/elections/{electionId}")
 @RestController
 @RequiredArgsConstructor
 public class ElectionKeyController {
@@ -38,7 +38,7 @@ public class ElectionKeyController {
     }
 
     
-    @GetMapping("/public-key")
+    @GetMapping("/keys/public")
     public ResponseEntity<ElectionPublicKeyResponse> getPublicKeyByElectionId(@Valid @PathVariable UUID electionId) {
         ElectionPublicKeyModel publicKey = getAuthorizationPublicKeyUseCase.getByElectionId(electionId);
         return ResponseEntity.ok(ElectionPublicKeyResponse.from(publicKey));

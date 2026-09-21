@@ -12,12 +12,10 @@ public class GatewayConfig {
         return builder.routes()
             .route("authorization-service", r -> r
                 .path("/api/elections/**")
-                .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8080")
             )
             .route("authentication-service", r -> r
-                .path("/api/auth/**", "/api/users/**")
-                .filters(f -> f.stripPrefix(1))
+                .path("/api/auth/**")
                 .uri("http://localhost:8082")
             )
             .build();

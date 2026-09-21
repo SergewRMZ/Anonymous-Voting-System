@@ -29,14 +29,13 @@ public class SecurityConfig {
 
                 // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                .pathMatchers(HttpMethod.GET, "/api/elections/*/public-key").permitAll()
+                .pathMatchers(HttpMethod.GET, "/api/elections/*/keys/public").permitAll()
 
                 // Authenticated endpoints
                 .pathMatchers(HttpMethod.POST, "/api/users/admin").hasRole(UserRole.AUTHORITY.name())
-                .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.POST, "/api/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
-                
-                .pathMatchers(HttpMethod.POST, "/api/elections/*/authorize-vote").permitAll()
+                .pathMatchers(HttpMethod.POST, "/api/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {
