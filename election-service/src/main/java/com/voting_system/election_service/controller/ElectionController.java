@@ -28,5 +28,7 @@ public class ElectionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ElectionDtoResponse.from(electionModel)
         );
-    }
+    }   
+
+    // Falta eliminar, actualizar y obtener información.
 }
