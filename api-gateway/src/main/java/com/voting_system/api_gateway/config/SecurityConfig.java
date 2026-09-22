@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.boot.micrometer.observation.autoconfigure.ObservationProperties.Http;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,7 +28,8 @@ public class SecurityConfig {
             .authorizeExchange(exchanges -> exchanges
 
                 // Endpoints para realizar pruebas
-                .pathMatchers(HttpMethod.PATCH, "/api/tally-service/election/*/encryption-keys/**").permitAll()
+                .pathMatchers("/api/tally-service/election/*/**").permitAll()
+                
                 // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/elections/*/keys/public").permitAll()

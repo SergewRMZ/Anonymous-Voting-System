@@ -21,7 +21,7 @@ public class PrivateEncryptionKeyRepository {
      * Constructor for KeyStorageAdapter.
      * @param keysDir The directory where cryptographic keys will be stored.
      */
-    public PrivateEncryptionKeyRepository(@Value("${app.keys.directory:./keys}") String keysDir) {
+    public PrivateEncryptionKeyRepository(@Value("${app.keys.directory:./tally-service/keys}") String keysDir) {
         this.keysDirectory = Paths.get(keysDir).toAbsolutePath().normalize();
     }
 

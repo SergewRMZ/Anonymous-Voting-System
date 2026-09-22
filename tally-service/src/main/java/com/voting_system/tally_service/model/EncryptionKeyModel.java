@@ -2,11 +2,7 @@ package com.voting_system.tally_service.model;
 
 import java.time.Instant;
 import java.util.UUID;
-
-import org.springframework.data.repository.query.QueryLookupStrategy.Key;
-
 import com.voting_system.tally_service.exception.InvalidKeyStateException;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
