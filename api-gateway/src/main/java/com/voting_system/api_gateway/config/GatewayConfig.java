@@ -12,8 +12,21 @@ public class GatewayConfig {
         return builder.routes()
             .route("authorization-service", r -> r
                 .path("/api/elections/**")
-                .filters(f -> f.stripPrefix(1))
                 .uri("http://localhost:8080")
-            ).build();
+            )
+            .route("authentication-service", r -> r
+                .path("/api/auth/**")
+                .uri("http://localhost:8082")
+            )
+            .route("election-service", r -> r
+                .path("/api/election/**")
+                .uri("http://localhost:8083")
+
+            )
+            .route("tally-service", r -> r
+                .path("/api/tally-service/election/**")
+                .uri("http://localhost:8084")
+            )
+            .build();
     }
 }

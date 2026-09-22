@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class VoterAuthorizationController {
     private final GenerateBlindSignatureUseCase generateBlindSignatureUseCase;
 
-    @PostMapping("/elections/{electionId}/authorize-vote")
+    @PostMapping("/api/elections/{electionId}/blind-signature")
     public ResponseEntity<BlindSignatureResponse> authorizeVote(@PathVariable UUID electionId, @Valid @RequestBody BlindSignatureRequest request) {
         AuthorizedVoterModel authorizedVoter = generateBlindSignatureUseCase.generateBlindSignature(electionId, request.getBlindedMessage());
         return ResponseEntity.status(HttpStatus.OK).body(BlindSignatureResponse.from(authorizedVoter));

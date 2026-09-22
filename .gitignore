@@ -32,5 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 keys/
+tally-service/keys
 postgres/
 .env
+README-docs.md
+instructions.md
+images/
