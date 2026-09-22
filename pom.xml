@@ -24,6 +24,7 @@
         <module>bulletin-board</module>
         <module>authentication-service</module>
         <module>election-service</module>
+        <module>tally-service</module>
     </modules>
 
     <properties>
