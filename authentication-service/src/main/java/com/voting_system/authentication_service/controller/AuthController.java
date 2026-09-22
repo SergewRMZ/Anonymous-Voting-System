@@ -10,7 +10,6 @@ import com.voting_system.authentication_service.model.UserRole;
 import com.voting_system.authentication_service.services.UserService;
 
 import jakarta.validation.Valid;
-import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;

@@ -18,6 +18,11 @@ public class GatewayConfig {
                 .path("/api/auth/**")
                 .uri("http://localhost:8082")
             )
+            .route("election-service", r -> r
+                .path("/api/election/**")
+                .uri("http://localhost:8083")
+
+            )
             .build();
     }
 }

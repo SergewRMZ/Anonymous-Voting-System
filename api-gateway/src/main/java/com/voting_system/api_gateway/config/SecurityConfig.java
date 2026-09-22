@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.micrometer.observation.autoconfigure.ObservationProperties.Http;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,14 +29,19 @@ public class SecurityConfig {
             .authorizeExchange(exchanges -> exchanges
 
                 // Public endpoints
-                .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/elections/*/keys/public").permitAll()
 
                 // Authenticated endpoints
-                .pathMatchers(HttpMethod.POST, "/api/users/admin").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.POST, "/api/auth/admin").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())
+
+                // authorization-service
                 .pathMatchers(HttpMethod.POST, "/api/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
+
+                // election-service
+                .pathMatchers(HttpMethod.POST, "/api/election").hasRole(UserRole.ADMIN.name())
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {
