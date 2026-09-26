@@ -19,7 +19,7 @@ public class GatewayConfig {
                 .uri("http://localhost:8082")
             )
             .route("election-service", r -> r
-                .path("/api/election/**")
+                .path("/api/election-service/**")
                 .uri("http://localhost:8083")
 
             )

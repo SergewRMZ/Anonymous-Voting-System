@@ -1,9 +1,6 @@
 package com.voting_system.tally_service.service;
 
 import java.util.UUID;
-
-import javax.security.auth.kerberos.EncryptionKey;
-
 import com.voting_system.tally_service.dto.UpdateEncryptionKeyStatusDto;
 import com.voting_system.tally_service.model.EncryptionKeyModel;
 

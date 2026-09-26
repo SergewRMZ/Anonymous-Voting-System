@@ -42,8 +42,9 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.POST, "/api/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
 
-                // election-service
-                .pathMatchers(HttpMethod.POST, "/api/election").hasRole(UserRole.ADMIN.name())
+                // ELECTION-SERVICE
+                // ESTOS ENDPOINTS ESTÁN SIENDO TESTEADOS
+                .pathMatchers("/api/election-service/**").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {

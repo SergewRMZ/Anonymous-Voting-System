@@ -8,15 +8,17 @@ import lombok.RequiredArgsConstructor;
 import com.voting_system.election_service.domain.ElectionModel;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionDtoResponse;
-import com.voting_system.election_service.services.IElectionService;
+import com.voting_system.election_service.services.interfaces.IElectionService;
+
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 
-
-@RequestMapping("/api/election")
+@RequestMapping("/api/election-service/elections")
 @RestController 
 @RequiredArgsConstructor 
 public class ElectionController {
@@ -30,5 +32,8 @@ public class ElectionController {
         );
     }   
 
-    // Falta eliminar, actualizar y obtener información.
+    @GetMapping("")
+    public ResponseEntity<List<ElectionModel>> getElections() {
+        return ResponseEntity.ok(electionService.getElections());
+    }
 }

@@ -22,7 +22,7 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-@RequestMapping("/api/elections/{electionId}")
+@RequestMapping("/api/elections/{electionId}/keys")
 @RestController
 @RequiredArgsConstructor
 public class ElectionKeyController {
@@ -31,20 +31,20 @@ public class ElectionKeyController {
     private final ActiveKeyUseCase activeKeyUseCase;
 
 
-    @PostMapping("/keys")
+    @PostMapping("")
     public ResponseEntity<ElectionPublicKeyResponse> create(@Valid @PathVariable UUID electionId) {
         ElectionPublicKeyModel saved = createAuthorizationKeysUseCase.generateKeyPair(electionId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ElectionPublicKeyResponse.from(saved));
     }
 
     
-    @GetMapping("/keys/public")
+    @GetMapping("/public")
     public ResponseEntity<ElectionPublicKeyResponse> getPublicKeyByElectionId(@Valid @PathVariable UUID electionId) {
         ElectionPublicKeyModel publicKey = getAuthorizationPublicKeyUseCase.getByElectionId(electionId);
         return ResponseEntity.ok(ElectionPublicKeyResponse.from(publicKey));
     }
 
-    @PatchMapping("/keys/activate")
+    @PatchMapping("/activate")
     public ResponseEntity<ElectionPublicKeyResponse> activateKey(@Valid @PathVariable UUID electionId) {
         ElectionPublicKeyModel publicKeyModel = activeKeyUseCase.activateKey(electionId);
         return ResponseEntity.ok(ElectionPublicKeyResponse.from(publicKeyModel));
