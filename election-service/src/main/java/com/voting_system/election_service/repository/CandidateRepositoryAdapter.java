@@ -26,8 +26,9 @@ public class CandidateRepositoryAdapter implements ICandidateRepository {
 
     @Override
     public List<CandidateModel> getCandidates() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCandidates'");
+        return jpaCandidateRepository.findAll()
+            .stream()
+            .map(candidateMapper::toModel)
+            .toList();
     }
-    
 }

@@ -1,4 +1,6 @@
 package com.voting_system.election_service.services;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.voting_system.election_service.domain.CandidateModel;
@@ -23,5 +25,10 @@ public class CandidateService implements ICandidateService {
             .build();
 
         return candidateRepositoryAdapter.save(model);
+    }
+
+    @Override 
+    public List<CandidateModel> getCandidates() {
+        return candidateRepositoryAdapter.getCandidates();
     }
 }

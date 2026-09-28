@@ -38,4 +38,24 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler (CandidateNotFoundException.class)
+    public ProblemDetail handleCandidateNotFoundException(CandidateNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage());
+
+        problemDetail.setTitle("Candidate Not Found");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (ElectionPositionNotFoundException.class)
+    public ProblemDetail handleElectionPositionNotFoundException(ElectionPositionNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage());
+
+        problemDetail.setTitle("Election Position Not Found");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }

@@ -10,12 +10,13 @@ import com.voting_system.election_service.services.CandidateService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.apache.catalina.connector.Response;
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController 
 @RequestMapping ("/api/election-service/candidates")
@@ -27,5 +28,9 @@ public class CandidateController {
         CandidateModel model = candidateService.createCandidate(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(CandidateDtoResponse.fromModel(model));
     }
-    
+
+    @GetMapping("")
+    public ResponseEntity<List<CandidateModel>> getCandidates() {
+        return ResponseEntity.ok(candidateService.getCandidates());
+    }
 }
