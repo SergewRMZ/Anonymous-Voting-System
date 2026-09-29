@@ -11,7 +11,7 @@ public class GatewayConfig {
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         return builder.routes()
             .route("authorization-service", r -> r
-                .path("/api/elections/**")
+                .path("/api/authorization-service/elections/**")
                 .uri("http://localhost:8080")
             )
             .route("authentication-service", r -> r

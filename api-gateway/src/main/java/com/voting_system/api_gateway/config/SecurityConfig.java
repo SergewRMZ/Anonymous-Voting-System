@@ -39,8 +39,8 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())
 
                 // authorization-service
-                .pathMatchers(HttpMethod.POST, "/api/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
-                .pathMatchers(HttpMethod.POST, "/api/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
+                .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
 
                 // ELECTION-SERVICE
                 // ESTOS ENDPOINTS ESTÁN SIENDO TESTEADOS
