@@ -59,5 +59,17 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler (BlindSignatureAlreadyExistsException.class)
+    public ProblemDetail handleBlindSignatureAlreadyExistsException(BlindSignatureAlreadyExistsException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, 
+            ex.getMessage()
+        );
+
+        problemDetail.setTitle("The user has already request a blind signature");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }
 

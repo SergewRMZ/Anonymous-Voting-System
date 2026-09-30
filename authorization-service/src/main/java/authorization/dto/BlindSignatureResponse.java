@@ -13,15 +13,17 @@ import authorization.domain.model.BlindSignatureModel;
 public class BlindSignatureResponse {
     private UUID authoritizationKeysId;
     private UUID electionId;
+    private UUID userId;
     private String blindSignature;
     private Instant issuedAt;
 
     public static BlindSignatureResponse from(BlindSignatureModel blindSignatureModel) {
         return new BlindSignatureResponse(
-            blindSignatureModel.getElectionId(),
             blindSignatureModel.getId(),
+            blindSignatureModel.getElectionId(),
+            blindSignatureModel.getUserId(),
             blindSignatureModel.getBlindSignature(),
-            blindSignatureModel.getIssuedAt()
+            blindSignatureModel.getCreatedAt()
         );
     }
 }

@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import authorization.domain.model.KeyStatus;
 import authorization.entity.JpaBlindSignaturePublicKeyEntity;
-import java.util.List;
 
 
 public interface JpaBlindSignaturePublicKeyRepository extends JpaRepository<JpaBlindSignaturePublicKeyEntity, UUID> {
+    Optional<JpaBlindSignaturePublicKeyEntity> findById(UUID authorizationKeysId);
     Optional<JpaBlindSignaturePublicKeyEntity> findByElectionId(UUID electionId);
     Optional<JpaBlindSignaturePublicKeyEntity> findByStatus(KeyStatus status);
     Optional<JpaBlindSignaturePublicKeyEntity> findByElectionIdAndStatus(UUID electionId, KeyStatus status);

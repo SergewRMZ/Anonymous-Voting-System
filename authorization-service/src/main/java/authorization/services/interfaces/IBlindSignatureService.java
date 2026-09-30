@@ -6,5 +6,5 @@ import authorization.domain.model.BlindSignatureModel;
 import authorization.dto.BlindSignatureRequest;
 
 public interface IBlindSignatureService {
-    public BlindSignatureModel generateBlindSignature(UUID electionId, BlindSignatureRequest request);
+    public BlindSignatureModel generateBlindSignature(UUID electionId, UUID userId, BlindSignatureRequest request);
 }
