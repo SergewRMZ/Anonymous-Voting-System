@@ -48,7 +48,7 @@ class ElectionServiceDetailsTest {
             .description("Annual election")
             .startDate(createdAt)
             .endDate(createdAt.plusSeconds(3600))
-            .status(ElectionStatus.CREATED)
+            .status(ElectionStatus.DRAFT)
             .build();
         ElectionPositionModel electionPosition = ElectionPositionModel.builder()
             .id(electionPositionId)

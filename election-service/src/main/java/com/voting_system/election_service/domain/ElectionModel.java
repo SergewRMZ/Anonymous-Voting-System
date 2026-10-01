@@ -29,11 +29,19 @@ public class ElectionModel {
             throw new InvalidElectionDateException("Start date must be before end date");
         }
 
-        this.status = ElectionStatus.CREATED;
+        this.status = ElectionStatus.DRAFT;
+    }
+
+    public void publishElection() {
+        if(this.status == ElectionStatus.DRAFT) {
+            this.status = ElectionStatus.PUBLISHED;
+            return;
+        }
+        throw new InvalidElectionStateException("Only elections with DRAFT status can be published");
     }
 
     public void validateElection() {
-        if(this.status == ElectionStatus.CREATED) {
+        if(this.status == ElectionStatus.DRAFT) {
             this.status = ElectionStatus.VERIFIED;
             return;
         }
