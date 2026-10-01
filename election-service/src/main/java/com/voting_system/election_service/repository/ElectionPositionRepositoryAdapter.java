@@ -16,6 +16,9 @@ import com.voting_system.election_service.repository.jpa.JpaPositionRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+import java.util.UUID;
+
 @Repository 
 @RequiredArgsConstructor 
 public class ElectionPositionRepositoryAdapter implements IElectionPositionRepository {
@@ -35,5 +38,13 @@ public class ElectionPositionRepositoryAdapter implements IElectionPositionRepos
             
         JpaElectionPositionEntity entity = jpaElectionPositionRepository.save(electionPositionMapper.toEntity(model, positionEntity, electionEntity));
         return electionPositionMapper.toModel(entity);
+    }
+
+    @Override
+    public List<ElectionPositionModel> getByElectionId(UUID electionId) {
+        return jpaElectionPositionRepository.findAllByElection_Id(electionId)
+            .stream()
+            .map(electionPositionMapper::toModel)
+            .toList();
     }
 }

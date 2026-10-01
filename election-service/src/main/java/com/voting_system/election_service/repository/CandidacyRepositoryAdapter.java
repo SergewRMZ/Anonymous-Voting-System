@@ -2,16 +2,20 @@ package com.voting_system.election_service.repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
+import com.voting_system.election_service.domain.CandidateModel;
 import com.voting_system.election_service.domain.CandidacyModel;
 import com.voting_system.election_service.entity.JpaCandidacyEntity;
 import com.voting_system.election_service.entity.JpaCandidateEntity;
 import com.voting_system.election_service.entity.JpaElectionPositionEntity;
 import com.voting_system.election_service.exceptions.CandidateNotFoundException;
 import com.voting_system.election_service.exceptions.ElectionPositionNotFoundException;
+import com.voting_system.election_service.mappers.CandidateMapper;
 import com.voting_system.election_service.mappers.CandidacyMapper;
 import com.voting_system.election_service.repository.interfaces.ICandidacyRepository;
 import com.voting_system.election_service.repository.jpa.JpaCandidacyRepository;
@@ -27,6 +31,7 @@ public class CandidacyRepositoryAdapter implements ICandidacyRepository {
     private final JpaCandidateRepository jpaCandidateRepository;
     private final JpaElectionPositionRepository jpaElectionPositionRepository;
     private final CandidacyMapper candidacyMapper;
+    private final CandidateMapper candidateMapper;
     
     @Override
     public CandidacyModel save(CandidacyModel model) {
@@ -75,5 +80,18 @@ public class CandidacyRepositoryAdapter implements ICandidacyRepository {
             .stream()
             .map(candidacyMapper::toModel)
             .toList();
+    }
+
+    @Override
+    public Map<UUID, List<CandidateModel>> getCandidatesByElectionPositionIds(List<UUID> electionPositionIds) {
+        return jpaCandidacyRepository.findAllByElectionPositionEntity_IdIn(electionPositionIds)
+            .stream()
+            .collect(Collectors.groupingBy(
+                candidacy -> candidacy.getElectionPositionEntity().getId(),
+                Collectors.mapping(
+                    candidacy -> candidateMapper.toModel(candidacy.getCandidateEntity()),
+                    Collectors.toList()
+                )
+            ));
     }
 }

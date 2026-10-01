@@ -1,0 +1,114 @@
+@startuml ElectionService
+skinparam packageStyle rectangle
+hide empty members
+
+package "controller" {
+  class ElectionController
+  class ElectionPositionController
+  class CandidacyController
+  class PositionController
+  class CandidateController
+}
+
+package "services" {
+  interface IElectionService
+  interface IElectionPositionService
+  interface ICandidacyService
+  interface IPositionService
+  interface ICandidateService
+  class ElectionService
+  class ElectionPositionService
+  class CandidacyService
+  class PositionService
+  class CandidateService
+}
+
+package "repository ports" {
+  interface IElectionRepository
+  interface IElectionPositionRepository
+  interface ICandidacyRepository
+  interface IPositionRepository
+  interface ICandidateRepository
+}
+
+package "repository adapters" {
+  class ElectionRepositoryAdapter
+  class ElectionPositionRepositoryAdapter
+  class CandidacyRepositoryAdapter
+  class PositionRepositoryAdapter
+  class CandidateRepositoryAdapter
+}
+
+package "JPA repositories" {
+  interface JpaElectionRepository
+  interface JpaElectionPositionRepository
+  interface JpaCandidacyRepository
+  interface JpaPositionRepository
+  interface JpaCandidateRepository
+}
+
+package "domain" {
+  class ElectionModel
+  enum ElectionStatus
+  class ElectionPositionModel
+  class CandidacyModel
+  class PositionModel
+  class CandidateModel
+}
+
+package "JPA entities" {
+  class JpaElectionEntity
+  class JpaElectionPositionEntity
+  class JpaCandidacyEntity
+  class JpaPositionEntity
+  class JpaCandidateEntity
+}
+
+package "DTOs" {
+  class ElectionDetailsDtoResponse
+  class ElectionPositionDetailsDtoResponse
+  class ElectionCandidateDtoResponse
+}
+
+ElectionController --> IElectionService
+ElectionPositionController --> ElectionPositionService
+CandidacyController --> CandidacyService
+PositionController --> PositionService
+CandidateController --> CandidateService
+
+IElectionService <|.. ElectionService
+IElectionPositionService <|.. ElectionPositionService
+ICandidacyService <|.. CandidacyService
+IPositionService <|.. PositionService
+ICandidateService <|.. CandidateService
+ElectionService --> IElectionRepository
+ElectionService --> IElectionPositionRepository
+ElectionService --> IPositionRepository
+ElectionService --> ICandidacyRepository
+ElectionPositionService --> ElectionPositionRepositoryAdapter
+CandidacyService --> CandidacyRepositoryAdapter
+PositionService --> PositionRepositoryAdapter
+CandidateService --> CandidateRepositoryAdapter
+
+ElectionRepositoryAdapter ..|> IElectionRepository
+ElectionPositionRepositoryAdapter ..|> IElectionPositionRepository
+CandidacyRepositoryAdapter ..|> ICandidacyRepository
+PositionRepositoryAdapter ..|> IPositionRepository
+CandidateRepositoryAdapter ..|> ICandidateRepository
+ElectionRepositoryAdapter --> JpaElectionRepository
+ElectionPositionRepositoryAdapter --> JpaElectionPositionRepository
+CandidacyRepositoryAdapter --> JpaCandidacyRepository
+PositionRepositoryAdapter --> JpaPositionRepository
+CandidateRepositoryAdapter --> JpaCandidateRepository
+
+JpaElectionPositionEntity "*" --> "1" JpaElectionEntity : election
+JpaElectionPositionEntity "*" --> "1" JpaPositionEntity : position
+JpaCandidacyEntity "*" --> "1" JpaElectionPositionEntity : electionPosition
+JpaCandidacyEntity "*" --> "1" JpaCandidateEntity : candidate
+ElectionModel --> ElectionStatus
+
+ElectionController ..> ElectionDetailsDtoResponse : GET detail
+ElectionDetailsDtoResponse "1" *-- "*" ElectionPositionDetailsDtoResponse : positions
+ElectionPositionDetailsDtoResponse "1" *-- "*" ElectionCandidateDtoResponse : candidates
+
+@enduml

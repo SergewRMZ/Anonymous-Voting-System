@@ -1,6 +1,7 @@
 package com.voting_system.election_service.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 import com.voting_system.election_service.domain.PositionModel;
@@ -28,6 +29,14 @@ public class PositionRepositoryAdapter implements IPositionRepository {
     public List<PositionModel> getPositions() {
         List<JpaPositionEntity> list = jpaPositionRepository.findAll();
         return list.stream()
+            .map(positionMapper::toModel)
+            .toList();
+    }
+
+    @Override
+    public List<PositionModel> getByIds(List<UUID> ids) {
+        return jpaPositionRepository.findAllById(ids)
+            .stream()
             .map(positionMapper::toModel)
             .toList();
     }

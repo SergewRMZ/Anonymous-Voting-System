@@ -5,9 +5,11 @@ import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.voting_system.election_service.exceptions.*;
 
+@RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidElectionStateException.class)
     public ProblemDetail handelInvalidElectionStateException(InvalidElectionStateException ex) {
