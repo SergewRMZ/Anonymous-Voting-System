@@ -9,6 +9,9 @@ import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 
 public interface IElectionService {
     public ElectionModel createElection(CreateElectionDtoRequest createElectionDtoRequest);
-    public List<ElectionModel> getElections();
-    public ElectionDetailsDtoResponse getElectionDetails(UUID electionId);
+    public ElectionModel publishElection(UUID electionId);
+    public ElectionModel validateElection(UUID electionId);
+    public ElectionModel activateElection(UUID electionId);
+    public List<ElectionModel> getElections(List<String> roles);
+    public ElectionDetailsDtoResponse getElectionDetails(UUID electionId, List<String> roles);
 }

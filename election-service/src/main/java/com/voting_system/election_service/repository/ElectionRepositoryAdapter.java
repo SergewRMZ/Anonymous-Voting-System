@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 import com.voting_system.election_service.domain.ElectionModel;
+import com.voting_system.election_service.domain.ElectionStatus;
 import com.voting_system.election_service.entity.JpaElectionEntity;
 import com.voting_system.election_service.exceptions.ElectionNotFoundException;
 import com.voting_system.election_service.mappers.ElectionMapper;
@@ -39,5 +40,13 @@ public class ElectionRepositoryAdapter implements IElectionRepository {
         return jpaElectionRepository.findById(electionId)
             .map(electionMapper::toModel)
             .orElseThrow(() -> new ElectionNotFoundException("Election not found with ID: " + electionId));
+    }
+
+    @Override 
+    public List<ElectionModel> findByStatusIn(List<ElectionStatus> statuses) {
+        List<JpaElectionEntity> list = jpaElectionRepository.findAllByStatusIn(statuses);
+        return list.stream()
+            .map(electionMapper::toModel)
+            .toList();
     }
 }

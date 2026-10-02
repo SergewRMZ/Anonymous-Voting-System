@@ -33,18 +33,38 @@ public class ElectionModel {
     }
 
     public void publishElection() {
-        if(this.status == ElectionStatus.DRAFT) {
-            this.status = ElectionStatus.PUBLISHED;
-            return;
+        if(this.status != ElectionStatus.DRAFT) {
+            throw new InvalidElectionStateException("Only elections with DRAFT status can be published");
         }
-        throw new InvalidElectionStateException("Only elections with DRAFT status can be published");
+        this.status = ElectionStatus.PUBLISHED;
+        return;
     }
 
     public void validateElection() {
-        if(this.status == ElectionStatus.DRAFT) {
+        if(this.status == ElectionStatus.PUBLISHED) {
             this.status = ElectionStatus.VERIFIED;
             return;
         }
         throw new InvalidElectionStateException("Only elections with CREATED status can be verified");
+    }
+
+    public void activateElection() {
+    
+        if(this.status != ElectionStatus.VERIFIED) {
+            throw new InvalidElectionStateException("Only elections with VERIFIED status can be activated");
+        }
+
+        Instant now = Instant.now();
+
+        if (now.isBefore(this.startDate)) {
+            throw new InvalidElectionStateException("Cannot activate election before its start date");
+        }
+
+        if (now.isAfter(this.endDate)) {
+            throw new InvalidElectionStateException("Cannot activate election after its end date");
+        }
+
+        this.status = ElectionStatus.ACTIVE;
+        return;
     }
 }

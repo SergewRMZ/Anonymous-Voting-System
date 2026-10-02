@@ -12,11 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.voting_system.election_service.domain.CandidateModel;
 import com.voting_system.election_service.domain.ElectionModel;
 import com.voting_system.election_service.domain.ElectionPositionModel;
+import com.voting_system.election_service.domain.ElectionStatus;
 import com.voting_system.election_service.domain.PositionModel;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionCandidateDtoResponse;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.ElectionPositionDetailsDtoResponse;
+import com.voting_system.election_service.exceptions.ElectionNotFoundException;
 import com.voting_system.election_service.exceptions.PositionNotFoundException;
 import com.voting_system.election_service.repository.interfaces.ICandidacyRepository;
 import com.voting_system.election_service.repository.interfaces.IElectionPositionRepository;
@@ -48,19 +50,51 @@ public class ElectionService implements IElectionService {
     }
 
     @Override 
-    public List<ElectionModel> getElections() {
-        return electionRepository.getElections();
+    public ElectionModel publishElection(UUID electionId) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        electionModel.publishElection();
+        return electionRepository.save(electionModel);
+    }
+
+    @Override 
+    public ElectionModel validateElection(UUID electionId) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        electionModel.validateElection();
+        return electionRepository.save(electionModel);
+    }
+
+    @Override 
+    public ElectionModel activateElection(UUID electionId) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        electionModel.activateElection();
+        return electionRepository.save(electionModel);
+    }
+
+    @Override 
+    public List<ElectionModel> getElections(List<String> roles) {
+        List<ElectionStatus> allowedStatuses = getAllowedStatusesForRoles(roles);
+        return electionRepository.findByStatusIn(allowedStatuses);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ElectionDetailsDtoResponse getElectionDetails(UUID electionId) {
+    public ElectionDetailsDtoResponse getElectionDetails(UUID electionId, List<String> roles) {
         ElectionModel election = electionRepository.getElection(electionId);
+        List<ElectionStatus> allowedStatuses = getAllowedStatusesForRoles(roles);
+
+        // Check if the election's status is allowed for the user's roles.
+        if (!allowedStatuses.contains(election.getStatus())) {
+            throw new ElectionNotFoundException(
+                "This user doesn't have permission to view election with ID: " + electionId
+            );
+        }
+
         List<ElectionPositionModel> electionPositions = electionPositionRepository.getByElectionId(electionId);
 
         List<UUID> positionIds = electionPositions.stream()
             .map(ElectionPositionModel::getPositionId)
             .toList();
+
         Map<UUID, PositionModel> positionsById = positionIds.isEmpty()
             ? Map.of()
             : positionRepository.getByIds(positionIds).stream()
@@ -69,6 +103,7 @@ public class ElectionService implements IElectionService {
         List<UUID> electionPositionIds = electionPositions.stream()
             .map(ElectionPositionModel::getId)
             .toList();
+
         Map<UUID, List<CandidateModel>> candidatesByElectionPositionId = electionPositionIds.isEmpty()
             ? Map.of()
             : candidacyRepository.getCandidatesByElectionPositionIds(electionPositionIds);
@@ -105,5 +140,36 @@ public class ElectionService implements IElectionService {
             election.getStatus(),
             positionResponses
         );
+    }
+
+    private List<ElectionStatus> getAllowedStatusesForRoles(List<String> roles) {
+        if(roles.contains("ROLE_ADMIN")) {
+            return List.of(
+                ElectionStatus.DRAFT,
+                ElectionStatus.PUBLISHED,
+                ElectionStatus.VERIFIED,
+                ElectionStatus.ACTIVE,
+                ElectionStatus.CLOSED,
+                ElectionStatus.FINISHED
+            );
+        }
+
+        else if(roles.contains("ROLE_AUTHORITY")) {
+            return List.of(
+                ElectionStatus.PUBLISHED,
+                ElectionStatus.VERIFIED,
+                ElectionStatus.ACTIVE,
+                ElectionStatus.CLOSED,
+                ElectionStatus.FINISHED
+            );
+        }
+
+        else {
+            return List.of(
+                ElectionStatus.ACTIVE,
+                ElectionStatus.CLOSED,
+                ElectionStatus.FINISHED
+            );
+        }
     }
 }
