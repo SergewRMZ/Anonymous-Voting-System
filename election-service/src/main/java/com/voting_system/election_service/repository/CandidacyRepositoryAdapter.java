@@ -2,13 +2,10 @@ package com.voting_system.election_service.repository;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
-import com.voting_system.election_service.domain.CandidateModel;
 import com.voting_system.election_service.domain.CandidacyModel;
 import com.voting_system.election_service.entity.JpaCandidacyEntity;
 import com.voting_system.election_service.entity.JpaCandidateEntity;
@@ -31,7 +28,6 @@ public class CandidacyRepositoryAdapter implements ICandidacyRepository {
     private final JpaCandidateRepository jpaCandidateRepository;
     private final JpaElectionPositionRepository jpaElectionPositionRepository;
     private final CandidacyMapper candidacyMapper;
-    private final CandidateMapper candidateMapper;
     
     @Override
     public CandidacyModel save(CandidacyModel model) {
@@ -83,15 +79,11 @@ public class CandidacyRepositoryAdapter implements ICandidacyRepository {
     }
 
     @Override
-    public Map<UUID, List<CandidateModel>> getCandidatesByElectionPositionIds(List<UUID> electionPositionIds) {
-        return jpaCandidacyRepository.findAllByElectionPositionEntity_IdIn(electionPositionIds)
+    public List<CandidacyModel> getCandidaciesByElectionPositionIds(List<UUID> electionPositionIds) {
+        return jpaCandidacyRepository
+            .findAllByElectionPositionEntity_IdIn(electionPositionIds)
             .stream()
-            .collect(Collectors.groupingBy(
-                candidacy -> candidacy.getElectionPositionEntity().getId(),
-                Collectors.mapping(
-                    candidacy -> candidateMapper.toModel(candidacy.getCandidateEntity()),
-                    Collectors.toList()
-                )
-            ));
+            .map(candidacyMapper::toModel)
+            .toList();
     }
 }

@@ -1,6 +1,7 @@
 package com.voting_system.election_service.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +28,14 @@ public class CandidateRepositoryAdapter implements ICandidateRepository {
     @Override
     public List<CandidateModel> getCandidates() {
         return jpaCandidateRepository.findAll()
+            .stream()
+            .map(candidateMapper::toModel)
+            .toList();
+    }
+
+    @Override 
+    public List<CandidateModel> findAllByIds(List<UUID> candidateIds) {
+        return jpaCandidateRepository.findAllById(candidateIds)
             .stream()
             .map(candidateMapper::toModel)
             .toList();
