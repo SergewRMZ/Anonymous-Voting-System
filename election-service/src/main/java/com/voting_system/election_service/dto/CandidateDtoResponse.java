@@ -1,6 +1,4 @@
 package com.voting_system.election_service.dto;
-
-import java.time.Instant;
 import java.util.UUID;
 
 import com.voting_system.election_service.domain.CandidateModel;
@@ -10,7 +8,7 @@ public record CandidateDtoResponse(
     String name,
     String lastName,
     String description,
-    Instant createdAt
+    boolean isActive
 ) {
     public static CandidateDtoResponse fromModel(CandidateModel model) {
         return new CandidateDtoResponse(
@@ -18,6 +16,7 @@ public record CandidateDtoResponse(
             model.getName(), 
             model.getLastName(), 
             model.getDescription(),
-            model.getCreatedAt());
+            model.isActive()
+        );
     }
 }

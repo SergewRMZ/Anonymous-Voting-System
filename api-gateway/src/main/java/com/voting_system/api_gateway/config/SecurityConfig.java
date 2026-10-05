@@ -28,7 +28,7 @@ public class SecurityConfig {
             .authorizeExchange(exchanges -> exchanges
 
                 // Endpoints para realizar pruebas
-                .pathMatchers("/api/tally-service/election/*/**").permitAll()
+                .pathMatchers("/api/tally-service/elections/**").permitAll()
                 
                 // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
@@ -49,8 +49,6 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.GET, "/api/election-service/elections").hasAnyRole(UserRole.VOTER.name(), UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.GET, "/api/election-service/elections/{electionId}").hasAnyRole(UserRole.VOTER.name(), UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
 
-                // ESTOS ENDPOINTS ESTÁN SIENDO TESTEADOS
-                .pathMatchers("/api/election-service/**").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {

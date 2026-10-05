@@ -24,7 +24,7 @@ public class GatewayConfig {
 
             )
             .route("tally-service", r -> r
-                .path("/api/tally-service/election/**")
+                .path("/api/tally-service/**")
                 .uri("http://localhost:8084")
             )
             .build();

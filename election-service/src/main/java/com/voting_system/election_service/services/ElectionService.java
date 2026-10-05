@@ -16,7 +16,7 @@ import com.voting_system.election_service.domain.ElectionPositionModel;
 import com.voting_system.election_service.domain.ElectionStatus;
 import com.voting_system.election_service.domain.PositionModel;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
-import com.voting_system.election_service.dto.ElectionCandidateDtoResponse;
+import com.voting_system.election_service.dto.ElectionCandidacyDtoResponse;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.ElectionPositionDetailsDtoResponse;
 import com.voting_system.election_service.exceptions.CandidateNotFoundException;
@@ -173,7 +173,7 @@ public class ElectionService implements IElectionService {
                     );
                 }
 
-                List<ElectionCandidateDtoResponse> candidateResponses = 
+                List<ElectionCandidacyDtoResponse> candidateResponses = 
                     candidaciesByElectionPositionId
                         .getOrDefault(electionPosition.getId(), List.of())
                         .stream()
@@ -188,7 +188,7 @@ public class ElectionService implements IElectionService {
                                 );
                             }
 
-                            return ElectionCandidateDtoResponse.fromModels(
+                            return ElectionCandidacyDtoResponse.fromModels(
                                 candidacy, 
                                 candidateModel
                             );

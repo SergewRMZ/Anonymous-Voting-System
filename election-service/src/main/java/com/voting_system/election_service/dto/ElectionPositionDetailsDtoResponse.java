@@ -7,5 +7,5 @@ public record ElectionPositionDetailsDtoResponse(
     UUID electionPositionId,
     UUID positionId,
     String positionName,
-    List<ElectionCandidateDtoResponse> candidates
+    List<ElectionCandidacyDtoResponse> candidacies
 ) {}

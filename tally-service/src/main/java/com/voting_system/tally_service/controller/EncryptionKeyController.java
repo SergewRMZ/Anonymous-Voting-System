@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController 
-@RequestMapping ("/api/tally-service/election")
+@RequestMapping ("/api/tally-service/elections")
 @RequiredArgsConstructor 
 public class EncryptionKeyController {
     private final EncryptionKeyService encryptionKeyService;
