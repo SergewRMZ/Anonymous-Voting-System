@@ -6,35 +6,36 @@ import org.springframework.web.bind.annotation.RestController;
 import com.voting_system.election_service.domain.PositionModel;
 import com.voting_system.election_service.dto.CreatePositionDtoRequest;
 import com.voting_system.election_service.dto.PositionDtoResponse;
-import com.voting_system.election_service.services.IPositionService;
+import com.voting_system.election_service.services.interfaces.IPositionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.UUID;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 
-
-@RequestMapping ("/api/election")
+@RequestMapping ("/api/election-service/positions")
 @RestController 
 @RequiredArgsConstructor 
 public class PositionController {
     private final IPositionService positionService;
-    @PostMapping("/{electionId}/position")
+    @PostMapping("")
     public ResponseEntity<PositionDtoResponse> createPosition(
-        @PathVariable UUID electionId,
         @Valid @RequestBody CreatePositionDtoRequest request
     ) {
-        PositionModel position = positionService.createPosition(request, electionId);
-        
+        PositionModel position = positionService.createPosition(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(
             PositionDtoResponse.from(position)
         );
     }
-    
+
+    @GetMapping("")
+    public ResponseEntity<List<PositionModel>> getPositions() {
+        return ResponseEntity.ok(positionService.getPositions());
+    }
 }

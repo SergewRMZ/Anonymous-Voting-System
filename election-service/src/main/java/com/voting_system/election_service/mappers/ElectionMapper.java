@@ -10,6 +10,7 @@ public class ElectionMapper {
     public JpaElectionEntity toEntity(ElectionModel electionModel) {
         if(electionModel == null) return null;
         return JpaElectionEntity.builder()
+            .id(electionModel.getId())
             .name(electionModel.getName())
             .description(electionModel.getDescription())
             .startsAt(electionModel.getStartDate())

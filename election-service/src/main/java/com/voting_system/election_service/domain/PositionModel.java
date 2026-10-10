@@ -11,6 +11,5 @@ import lombok.Getter;
 @Builder 
 public class PositionModel {
     private UUID id;
-    private UUID electionId;
     private String positionName;
 }

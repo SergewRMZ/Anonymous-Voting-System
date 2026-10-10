@@ -52,4 +52,10 @@ public class EncryptionKeyService implements IEncryptionKeyService {
         encryptionKeyModel.activate(); 
         return encryptionKeyRepository.save(encryptionKeyModel);
     }
+
+    @Override
+    public EncryptionKeyModel getPublicEncryptionKey(UUID electionId) {
+        return encryptionKeyRepository.findByElectionId(electionId)
+            .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
+    }
 }

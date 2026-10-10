@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController 
-@RequestMapping ("/api/tally-service/election")
+@RequestMapping ("/api/tally-service/elections")
 @RequiredArgsConstructor 
 public class EncryptionKeyController {
     private final EncryptionKeyService encryptionKeyService;
@@ -46,4 +46,18 @@ public class EncryptionKeyController {
             EncryptionKeyDtoResponse.from(model)
         );
     }
+
+    @GetMapping("/{electionId}/encryption-keys/public")
+    public ResponseEntity<EncryptionKeyDtoResponse> getMethodName(@PathVariable UUID electionId) {
+        EncryptionKeyModel model = encryptionKeyService.getPublicEncryptionKey(electionId);
+        return ResponseEntity.status(HttpStatus.OK).body(EncryptionKeyDtoResponse.from(model));
+    }
+    
+
+    // ENDPOINT DE PRUEBA, ESTE LO USARÉ PARA PROBAR DESCIFRADO
+    @PostMapping("/decrypt")
+    public String decryptVote(@RequestBody String message) {
+        return "Decrypt Function";
+    }
+    
 }
