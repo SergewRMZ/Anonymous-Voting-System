@@ -3,7 +3,7 @@ package com.voting_system.bulletin_board.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.voting_system.bulletin_board.dto.AuthorizedVoteRequest;
+import com.voting_system.bulletin_board.dto.VoteRequest;
 import com.voting_system.bulletin_board.model.VoteModel;
 import com.voting_system.bulletin_board.service.interfaces.IVoteService;
 
@@ -28,9 +28,9 @@ public class VoteController {
     @PostMapping("/{electionId}/votes")
     public ResponseEntity<?> submitVote(
         @PathVariable UUID electionId,
-        @Valid @RequestBody AuthorizedVoteRequest request
+        @Valid @RequestBody VoteRequest request
     ) {
-        VoteModel voteModel = voteService.submitVote(electionId, request.toModel(electionId));
+        VoteModel voteModel = voteService.submitVote(electionId, request);
         
         return ResponseEntity.ok(request);
     }

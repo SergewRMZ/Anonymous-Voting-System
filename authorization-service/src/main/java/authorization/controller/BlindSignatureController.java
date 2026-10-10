@@ -33,6 +33,6 @@ public class BlindSignatureController {
     ) {
             UUID userId = UUID.fromString(jwt.getSubject());
             BlindSignatureModel blindSignatureModel = blindSignatureService.generateBlindSignature(electionId, userId, request);
-            return ResponseEntity.status(HttpStatus.OK).body(BlindSignatureResponse.from(blindSignatureModel));
+            return ResponseEntity.status(HttpStatus.CREATED).body(BlindSignatureResponse.from(blindSignatureModel));
     }
 }

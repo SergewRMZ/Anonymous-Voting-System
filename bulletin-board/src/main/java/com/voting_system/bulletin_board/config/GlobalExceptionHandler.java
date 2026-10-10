@@ -5,6 +5,7 @@ import org.springframework.http.ProblemDetail;
 import java.time.Instant;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +21,16 @@ public class GlobalExceptionHandler {
         );
 
         problemDetail.setTitle("Invalid RSA Public Key");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (VoteVerificationException.class)
+    public ProblemDetail handleVoteVerificationException(VoteVerificationException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+
+        problemDetail.setTitle("ERROR VOTE VALIDATION");
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }

@@ -1,12 +1,10 @@
-package com.voting_system.bulletin_board.client.authorization.dto;
+package com.voting_system.bulletin_board.client;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
 
-import com.voting_system.bulletin_board.client.authorization.model.KeyStatus;
-
-public record BlindSignaturePublicKeyResponse(
+public record AuthorizationPublicKey(
     UUID authorizationKeysId,
     UUID electionId,
     Map<String, Object> publicKey,

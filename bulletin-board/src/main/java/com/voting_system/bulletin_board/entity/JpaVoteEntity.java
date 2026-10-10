@@ -33,12 +33,12 @@ public class JpaVoteEntity {
     @Column (name = "vote", columnDefinition = "jsonb", nullable = false)
     private EncryptedVote vote;
 
-    @Column (name = "randomizer", nullable = false)
+    @Column (name = "randomizer", columnDefinition = "text", nullable = false)
     private String randomizer;
 
-    @Column (name = "digest", nullable = false)
+    @Column (name = "digest", columnDefinition = "text", nullable = false)
     private String digest;
 
-    @Column (name = "signature", nullable = false)
+    @Column (name = "signature", columnDefinition = "text", nullable = false)
     private String signature;
 }

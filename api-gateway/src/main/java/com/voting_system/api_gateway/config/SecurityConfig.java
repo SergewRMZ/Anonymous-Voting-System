@@ -20,6 +20,7 @@ import com.voting_system.api_gateway.enums.UserRole;
 @Configuration 
 @EnableWebFluxSecurity 
 public class SecurityConfig {
+    
     @Bean 
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity serverHttpSecurity) {
         return serverHttpSecurity
@@ -32,17 +33,21 @@ public class SecurityConfig {
                 
                 // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
-                .pathMatchers(HttpMethod.GET, "/api/elections/*/keys/public").permitAll()
 
-                // Authenticated endpoints
+                // bulletin-board
+                .pathMatchers(HttpMethod.POST, "/api/bulletin-board/elections/*/votes").hasRole(UserRole.VOTER.name())
+                
+                // authentication-service
                 .pathMatchers(HttpMethod.POST, "/api/auth/admin").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())
 
                 // authorization-service
-                .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/keys/*").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.GET, "/api/authorization-service/elections/*/keys/public").permitAll()
+                .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/keys").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.PATCH, "/api/authorization-service/elections/*/keys/activate").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
 
-                // ELECTION-SERVICE
+                // election-service
                 .pathMatchers(HttpMethod.POST, "/api/election-service/elections").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/publish").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/activate").hasRole(UserRole.AUTHORITY.name())

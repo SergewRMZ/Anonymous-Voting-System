@@ -33,6 +33,6 @@ spring:
         - id: authorization-service
           uri: http://localhost:8080
           predicates:
-            - Path=/api/elections/**
+            - Path=/api/authorization-service/**
 server:
   port: 9000

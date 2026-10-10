@@ -11,21 +11,29 @@ public class GatewayConfig {
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         return builder.routes()
             .route("authorization-service", r -> r
-                .path("/api/authorization-service/elections/**")
+                .path("/api/authorization-service/**")
                 .uri("http://localhost:8080")
             )
+
             .route("authentication-service", r -> r
                 .path("/api/auth/**")
                 .uri("http://localhost:8082")
             )
+
             .route("election-service", r -> r
                 .path("/api/election-service/**")
                 .uri("http://localhost:8083")
 
             )
+            
             .route("tally-service", r -> r
                 .path("/api/tally-service/**")
                 .uri("http://localhost:8084")
+            )
+
+            .route("bulletin-board", r -> r
+                .path("/api/bulletin-board/**")
+                .uri("http://localhost:8085")
             )
             .build();
     }
