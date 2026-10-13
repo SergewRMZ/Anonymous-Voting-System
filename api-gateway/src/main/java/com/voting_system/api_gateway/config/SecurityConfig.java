@@ -28,11 +28,12 @@ public class SecurityConfig {
             .csrf(ServerHttpSecurity.CsrfSpec::disable)
             .authorizeExchange(exchanges -> exchanges
 
-                // Endpoints para realizar pruebas
-                .pathMatchers("/api/tally-service/elections/**").permitAll()
-                
                 // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
+                .pathMatchers(HttpMethod.GET, "/api/tally-service/elections/*/encryption-keys/public").permitAll()
+                .pathMatchers(HttpMethod.POST, "/api/tally-service/elections/*/tally").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.POST, "/api/tally-service/elections/*/encryption-keys").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.PATCH, "/api/tally-service/elections/*/encryption-keys/status").hasRole(UserRole.AUTHORITY.name())
 
                 // bulletin-board
                 .pathMatchers(HttpMethod.POST, "/api/bulletin-board/elections/*/votes").permitAll()
@@ -51,6 +52,8 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.POST, "/api/election-service/elections").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/publish").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/activate").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/close").hasRole(UserRole.AUTHORITY.name())
+                .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/finish").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.GET, "/api/election-service/elections").hasAnyRole(UserRole.VOTER.name(), UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.GET, "/api/election-service/elections/{electionId}").hasAnyRole(UserRole.VOTER.name(), UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
 

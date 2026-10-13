@@ -15,6 +15,7 @@ import com.voting_system.election_service.domain.ElectionModel;
 import com.voting_system.election_service.domain.ElectionPositionModel;
 import com.voting_system.election_service.domain.ElectionStatus;
 import com.voting_system.election_service.domain.PositionModel;
+import com.voting_system.election_service.client.BulletinBoardClient;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionCandidacyDtoResponse;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
@@ -39,6 +40,7 @@ public class ElectionService implements IElectionService {
     private final ICandidateRepository candidateRepository;
     private final IPositionRepository positionRepository;
     private final ICandidacyRepository candidacyRepository;
+    private final BulletinBoardClient bulletinBoardClient;
 
     @Override 
     public ElectionModel createElection(CreateElectionDtoRequest createElectionDtoRequest) {
@@ -75,6 +77,35 @@ public class ElectionService implements IElectionService {
         ElectionModel electionModel = electionRepository.getElection(electionId);
         electionModel.activateElection();
         return electionRepository.save(electionModel);
+    }
+
+    @Override
+    public ElectionModel closeElection(UUID electionId) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        if (electionModel.getStatus() == ElectionStatus.CLOSED) {
+            return electionModel;
+        }
+        electionModel.beginClosing();
+        electionRepository.save(electionModel);
+        bulletinBoardClient.closeVoteAdmission(electionId);
+        electionModel = electionRepository.getElection(electionId);
+        electionModel.completeClosing();
+        return electionRepository.save(electionModel);
+    }
+
+    @Override
+    public ElectionModel finishElection(UUID electionId) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        if (electionModel.getStatus() == ElectionStatus.FINISHED) {
+            return electionModel;
+        }
+        electionModel.finishElection();
+        return electionRepository.save(electionModel);
+    }
+
+    @Override
+    public ElectionModel getElection(UUID electionId) {
+        return electionRepository.getElection(electionId);
     }
 
 
@@ -222,6 +253,7 @@ public class ElectionService implements IElectionService {
                 ElectionStatus.PUBLISHED,
                 ElectionStatus.VERIFIED,
                 ElectionStatus.ACTIVE,
+                ElectionStatus.CLOSING,
                 ElectionStatus.CLOSED,
                 ElectionStatus.FINISHED
             );
@@ -232,6 +264,7 @@ public class ElectionService implements IElectionService {
                 ElectionStatus.PUBLISHED,
                 ElectionStatus.VERIFIED,
                 ElectionStatus.ACTIVE,
+                ElectionStatus.CLOSING,
                 ElectionStatus.CLOSED,
                 ElectionStatus.FINISHED
             );

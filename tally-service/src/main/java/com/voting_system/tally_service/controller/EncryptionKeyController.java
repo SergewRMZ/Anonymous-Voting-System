@@ -4,9 +4,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voting_system.tally_service.dto.EncryptionKeyDtoResponse;
+import com.voting_system.tally_service.dto.TallyResultResponse;
 import com.voting_system.tally_service.dto.UpdateEncryptionKeyStatusDto;
 import com.voting_system.tally_service.model.EncryptionKeyModel;
 import com.voting_system.tally_service.service.EncryptionKeyService;
+import com.voting_system.tally_service.service.TallyService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor 
 public class EncryptionKeyController {
     private final EncryptionKeyService encryptionKeyService;
+    private final TallyService tallyService;
 
     @PostMapping("/{electionId}/encryption-keys")
     public ResponseEntity<EncryptionKeyDtoResponse> create(@PathVariable UUID electionId) {
@@ -52,12 +55,8 @@ public class EncryptionKeyController {
         EncryptionKeyModel model = encryptionKeyService.getPublicEncryptionKey(electionId);
         return ResponseEntity.status(HttpStatus.OK).body(EncryptionKeyDtoResponse.from(model));
     }
-    
-
-    // ENDPOINT DE PRUEBA, ESTE LO USARÉ PARA PROBAR DESCIFRADO
-    @PostMapping("/decrypt")
-    public String decryptVote(@RequestBody String message) {
-        return "Decrypt Function";
+    @PostMapping("/{electionId}/tally")
+    public ResponseEntity<TallyResultResponse> tally(@PathVariable UUID electionId) {
+        return ResponseEntity.ok(tallyService.tally(electionId));
     }
-    
 }

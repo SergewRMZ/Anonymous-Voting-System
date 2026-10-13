@@ -60,11 +60,41 @@ public class ElectionModel {
             throw new InvalidElectionStateException("Cannot activate election before its start date");
         }
 
-        if (now.isAfter(this.endDate)) {
+        if (!now.isBefore(this.endDate)) {
             throw new InvalidElectionStateException("Cannot activate election after its end date");
         }
 
         this.status = ElectionStatus.ACTIVE;
         return;
+    }
+
+    public void beginClosing() {
+        if (this.status == ElectionStatus.CLOSING) {
+            return;
+        }
+        if (this.status != ElectionStatus.ACTIVE) {
+            throw new InvalidElectionStateException("Only ACTIVE elections can be closed");
+        }
+        this.status = ElectionStatus.CLOSING;
+    }
+
+    public void completeClosing() {
+        if (this.status != ElectionStatus.CLOSING) {
+            throw new InvalidElectionStateException("Only CLOSING elections can become CLOSED");
+        }
+        this.status = ElectionStatus.CLOSED;
+    }
+
+    public boolean canAcceptVotes(Instant now) {
+        return this.status == ElectionStatus.ACTIVE
+            && !now.isBefore(this.startDate)
+            && now.isBefore(this.endDate);
+    }
+
+    public void finishElection() {
+        if (this.status != ElectionStatus.CLOSED) {
+            throw new InvalidElectionStateException("Only CLOSED elections can be finished");
+        }
+        this.status = ElectionStatus.FINISHED;
     }
 }

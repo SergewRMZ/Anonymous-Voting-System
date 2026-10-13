@@ -5,4 +5,5 @@ import com.voting_system.bulletin_board.dto.VoteRequestDto;
 import com.voting_system.bulletin_board.dto.VoteResponseDto;
 public interface IVoteService {
     public VoteResponseDto submitVote(UUID electionId, VoteRequestDto voteRequest);
+    public void closeAdmission(UUID electionId);
 }

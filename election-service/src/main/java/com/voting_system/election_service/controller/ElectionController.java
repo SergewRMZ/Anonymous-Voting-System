@@ -58,6 +58,18 @@ public class ElectionController {
         return ResponseEntity.ok(ElectionDtoResponse.from(electionModel));
     }
 
+    @PatchMapping("/{electionId}/close")
+    public ResponseEntity<ElectionDtoResponse> closeElection(@PathVariable UUID electionId) {
+        ElectionModel electionModel = electionService.closeElection(electionId);
+        return ResponseEntity.ok(ElectionDtoResponse.from(electionModel));
+    }
+
+    @PatchMapping("/{electionId}/finish")
+    public ResponseEntity<ElectionDtoResponse> finishElection(@PathVariable UUID electionId) {
+        ElectionModel electionModel = electionService.finishElection(electionId);
+        return ResponseEntity.ok(ElectionDtoResponse.from(electionModel));
+    }
+
 
     @GetMapping("")
     public ResponseEntity<List<ElectionDtoResponse>> getElections(@AuthenticationPrincipal Jwt jwt) {

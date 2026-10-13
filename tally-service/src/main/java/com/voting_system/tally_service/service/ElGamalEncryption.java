@@ -16,35 +16,22 @@ import org.springframework.stereotype.Service;
 @Service 
 public class ElGamalEncryption {
     private final X9ECParameters params;
-    private AsymmetricCipherKeyPair keyPair;
+
     public ElGamalEncryption() {
         this.params = SECNamedCurves.getByName("secp256k1");
     }
 
-    public void generateKeys() {
+    public KeyMaterial generateKeys() {
         ECDomainParameters domainParameters = new ECDomainParameters(params);
         ECKeyGenerationParameters keyGenerationParameters = new ECKeyGenerationParameters(domainParameters, new SecureRandom());
 
         ECKeyPairGenerator ecKeyPairGenerator = new ECKeyPairGenerator();
         ecKeyPairGenerator.init(keyGenerationParameters);
-        this.keyPair = ecKeyPairGenerator.generateKeyPair();
+        AsymmetricCipherKeyPair keyPair = ecKeyPairGenerator.generateKeyPair();
+        ECPublicKeyParameters publicKey = (ECPublicKeyParameters) keyPair.getPublic();
+        ECPrivateKeyParameters privateKey = (ECPrivateKeyParameters) keyPair.getPrivate();
+        return new KeyMaterial(publicKey.getQ().getEncoded(true), privateKey.getD().toByteArray());
     }
 
-    /**
-     * This method returns a public key compressed. For secp256k1 the public key length
-     * is 33 bytes.
-     */
-    public byte[] getPublicKey() {
-        ECPublicKeyParameters publicKey = (ECPublicKeyParameters) this.keyPair.getPublic();
-        return publicKey.getQ().getEncoded(true);
-    }
-
-    /**
-     * This method returns the private key bytes
-     * @return private key bytes of a key pair ElGamal encryption
-     */
-    public byte[] getPrivateKey() {
-        ECPrivateKeyParameters privateKey = (ECPrivateKeyParameters) this.keyPair.getPrivate();
-        return privateKey.getD().toByteArray();
-    }
+    public record KeyMaterial(byte[] publicKey, byte[] privateKey) {}
 }

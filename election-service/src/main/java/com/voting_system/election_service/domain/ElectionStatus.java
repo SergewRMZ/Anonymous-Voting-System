@@ -5,6 +5,7 @@ public enum ElectionStatus {
     PUBLISHED,
     VERIFIED,
     ACTIVE,
+    CLOSING,
     CLOSED,
     FINISHED
 }

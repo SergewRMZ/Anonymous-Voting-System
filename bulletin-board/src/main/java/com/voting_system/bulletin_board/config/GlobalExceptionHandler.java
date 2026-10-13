@@ -62,6 +62,16 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
-}
 
+    @ExceptionHandler(ElectionNotOpenException.class)
+    public ProblemDetail handleElectionNotOpenException(ElectionNotOpenException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            ex.getMessage()
+        );
+        problemDetail.setTitle("Election Not Accepting Votes");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+}
 

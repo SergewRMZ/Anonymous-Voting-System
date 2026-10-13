@@ -40,4 +40,20 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler(ElectionNotClosedException.class)
+    public ProblemDetail handleElectionNotClosed(ElectionNotClosedException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        problemDetail.setTitle("Election Not Closed");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidCiphertextException.class)
+    public ProblemDetail handleInvalidCiphertext(InvalidCiphertextException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage());
+        problemDetail.setTitle("Invalid Ciphertext");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }

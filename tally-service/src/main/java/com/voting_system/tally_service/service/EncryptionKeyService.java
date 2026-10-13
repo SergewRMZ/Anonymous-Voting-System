@@ -28,10 +28,10 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             throw new EncryptionKeysAlreadyExists("Encryption keys already exists for this election: " + electionId);
         }
 
-        elGamalEncryption.generateKeys();
+        ElGamalEncryption.KeyMaterial keyMaterial = elGamalEncryption.generateKeys();
         String publicKey = Base64
             .getEncoder()
-            .encodeToString(elGamalEncryption.getPublicKey());
+            .encodeToString(keyMaterial.publicKey());
 
         EncryptionKeyModel encryptionKeyModel = EncryptionKeyModel.builder()
             .electionId(electionId)
@@ -40,7 +40,7 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             .createdAt(Instant.now())
             .build();
 
-        privateEncryptionKeyRepository.savePrivateKey(electionId, elGamalEncryption.getPrivateKey());
+        privateEncryptionKeyRepository.savePrivateKey(electionId, keyMaterial.privateKey());
         return encryptionKeyRepository.save(encryptionKeyModel);
     }
 
@@ -49,7 +49,13 @@ public class EncryptionKeyService implements IEncryptionKeyService {
         EncryptionKeyModel encryptionKeyModel = encryptionKeyRepository.findByElectionId(electionId)
             .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
         
-        encryptionKeyModel.activate(); 
+        if (request.keyStatus() == KeyStatus.ACTIVE) {
+            encryptionKeyModel.activate();
+        } else if (request.keyStatus() == KeyStatus.EXPIRED) {
+            encryptionKeyModel.expire(Instant.now());
+        } else {
+            throw new IllegalArgumentException("Encryption key status can only be changed to ACTIVE or EXPIRED");
+        }
         return encryptionKeyRepository.save(encryptionKeyModel);
     }
 
