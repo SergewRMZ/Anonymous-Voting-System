@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.voting_system.bulletin_board.entity.JpaVoteEntity;
 
-public interface JpaVoteRepository extends JpaRepository<JpaVoteEntity, UUID> {}
+public interface JpaVoteRepository extends JpaRepository<JpaVoteEntity, UUID> {
+    boolean existsByElectionIdAndSignature(UUID electionId, String signature);
+}

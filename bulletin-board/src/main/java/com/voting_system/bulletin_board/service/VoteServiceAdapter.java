@@ -1,14 +1,20 @@
 package com.voting_system.bulletin_board.service;
 
+import java.security.PublicKey;
 import java.util.Base64;
 import java.util.UUID;
 
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.voting_system.bulletin_board.client.AuthorizationPublicKey;
 import com.voting_system.bulletin_board.client.AuthorizationServiceClient;
+import com.voting_system.bulletin_board.crypto.AuthorizationPublicKeyCache;
 import com.voting_system.bulletin_board.crypto.CryptoUtils;
-import com.voting_system.bulletin_board.dto.VoteRequest;
+import com.voting_system.bulletin_board.crypto.RsaBssaVerifier;
+import com.voting_system.bulletin_board.dto.VoteRequestDto;
+import com.voting_system.bulletin_board.dto.VoteResponseDto;
+import com.voting_system.bulletin_board.exceptions.DuplicateVoteException;
 import com.voting_system.bulletin_board.exceptions.VoteVerificationException;
 import com.voting_system.bulletin_board.model.VoteModel;
 import com.voting_system.bulletin_board.repository.interfaces.VoteRepositoryPort;
@@ -23,11 +29,27 @@ import tools.jackson.databind.ObjectMapper;
 public class VoteServiceAdapter implements IVoteService {
     private final VoteRepositoryPort voteRepositoryPort;
     private final AuthorizationServiceClient authorizationServiceClient;
+    private final AuthorizationPublicKeyCache authorizationPublicKeyCache;
+    private final RsaBssaVerifier rsaBssaVerifier;
 
     @Override 
-    public VoteModel submitVote(UUID electionId, VoteRequest voteRequest) {
+    public VoteResponseDto submitVote(UUID electionId, VoteRequestDto voteRequest) {
+        if(voteRepositoryPort.existsByElectionIdAndSignature(electionId, voteRequest.signature())) {
+            throw new DuplicateVoteException();
+        }
+        
         VoteModel voteModel = voteRequest.toModel(electionId);
-        AuthorizationPublicKey authorizationPublicKey = authorizationServiceClient.getPublicKey(electionId);
+        UUID authorizationKeysId = voteModel.getVote().authorizationKeysId();
+        
+        // Si no existe la clave pública en la caché, la solicitará al servicio la almacenará.
+        if(!authorizationPublicKeyCache.hasPublicKey(authorizationKeysId)) {
+            AuthorizationPublicKey authorizationPublicKey = authorizationServiceClient.getPublicKey(electionId);
+            byte[] n = CryptoUtils.base64UrlToBytes(authorizationPublicKey.publicKey().n());
+            byte[] e = CryptoUtils.base64ToBytes(authorizationPublicKey.publicKey().e());
+
+            PublicKey publicKey = rsaBssaVerifier.fromModulusAndExponent(n, e);
+            authorizationPublicKeyCache.put(authorizationKeysId, publicKey);
+        }
         
         ObjectMapper objectMapper = new ObjectMapper();
         String voteJson = objectMapper.writeValueAsString(voteModel.getVote());
@@ -40,7 +62,16 @@ public class VoteServiceAdapter implements IVoteService {
             throw new VoteVerificationException();
         }
         
-        return voteModel;
-        // return voteRepositoryPort.save(voteModel);
+        PublicKey publicKey = authorizationPublicKeyCache.getPublicKey(authorizationKeysId);
+        byte[] signature = CryptoUtils.base64ToBytes(voteModel.getSignature());
+        byte[] randomizer = CryptoUtils.base64ToBytes(voteModel.getRandomizer());
+        byte[] preparedMessage = CryptoUtils.concatenate(randomizer, calculatedDigest);
+
+        if(!rsaBssaVerifier.verify(preparedMessage, signature, publicKey)) {
+            throw new VoteVerificationException();
+        }
+        
+        voteModel = voteRepositoryPort.save(voteModel);
+        return new VoteResponseDto(voteModel.getId());
     }
 }

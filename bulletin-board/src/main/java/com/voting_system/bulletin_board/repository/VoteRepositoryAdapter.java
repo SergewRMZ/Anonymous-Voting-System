@@ -1,4 +1,5 @@
 package com.voting_system.bulletin_board.repository;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -20,5 +21,10 @@ public class VoteRepositoryAdapter implements VoteRepositoryPort {
     public VoteModel save(VoteModel vote) {
         JpaVoteEntity voteEntity = jpaVoteRepository.save(voteMapper.toEntity(vote));
         return voteMapper.toModel(voteEntity);
+    }
+
+    @Override 
+    public boolean existsByElectionIdAndSignature(UUID electionId, String signature) {
+        return jpaVoteRepository.existsByElectionIdAndSignature(electionId, signature);
     }
 }

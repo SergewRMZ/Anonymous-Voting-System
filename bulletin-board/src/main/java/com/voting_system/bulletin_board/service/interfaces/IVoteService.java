@@ -1,8 +1,8 @@
 package com.voting_system.bulletin_board.service.interfaces;
 import java.util.UUID;
 
-import com.voting_system.bulletin_board.dto.VoteRequest;
-import com.voting_system.bulletin_board.model.VoteModel;
+import com.voting_system.bulletin_board.dto.VoteRequestDto;
+import com.voting_system.bulletin_board.dto.VoteResponseDto;
 public interface IVoteService {
-    public VoteModel submitVote(UUID electionId, VoteRequest voteRequest);
+    public VoteResponseDto submitVote(UUID electionId, VoteRequestDto voteRequest);
 }

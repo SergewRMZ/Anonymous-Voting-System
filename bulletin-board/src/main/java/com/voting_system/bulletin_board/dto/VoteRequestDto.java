@@ -7,7 +7,7 @@ import com.voting_system.bulletin_board.model.VoteModel;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-public record VoteRequest(
+public record VoteRequestDto(
     @NotNull 
     EncryptedVote encryptedVote,
     
