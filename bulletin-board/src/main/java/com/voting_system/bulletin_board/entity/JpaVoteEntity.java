@@ -16,9 +16,11 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter 
 @AllArgsConstructor 
+@NoArgsConstructor 
 @Builder 
 @Entity 
 @Table (

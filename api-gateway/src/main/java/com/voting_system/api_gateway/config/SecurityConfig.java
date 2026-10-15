@@ -36,7 +36,7 @@ public class SecurityConfig {
 
                 // bulletin-board
                 .pathMatchers(HttpMethod.POST, "/api/bulletin-board/elections/*/votes").permitAll()
-                
+                .pathMatchers(HttpMethod.GET, "/api/bulletin-board/elections/*/votes").permitAll()
                 // authentication-service
                 .pathMatchers(HttpMethod.POST, "/api/auth/admin").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())

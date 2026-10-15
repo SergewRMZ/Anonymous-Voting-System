@@ -2,10 +2,13 @@ package com.voting_system.bulletin_board.repository.jpa;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.voting_system.bulletin_board.entity.JpaVoteEntity;
 
 public interface JpaVoteRepository extends JpaRepository<JpaVoteEntity, UUID> {
-    boolean existsByElectionIdAndSignature(UUID electionId, String signature);
+    public boolean existsByElectionIdAndSignature(UUID electionId, String signature);
+    public Page<JpaVoteEntity> findAllByElectionId(UUID electionId, Pageable pageable);
 }

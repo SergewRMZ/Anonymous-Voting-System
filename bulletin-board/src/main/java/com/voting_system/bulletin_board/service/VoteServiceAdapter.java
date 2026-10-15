@@ -1,10 +1,13 @@
 package com.voting_system.bulletin_board.service;
 
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.UUID;
 
-import org.springframework.stereotype.Component;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.voting_system.bulletin_board.client.AuthorizationPublicKey;
@@ -12,8 +15,9 @@ import com.voting_system.bulletin_board.client.AuthorizationServiceClient;
 import com.voting_system.bulletin_board.crypto.AuthorizationPublicKeyCache;
 import com.voting_system.bulletin_board.crypto.CryptoUtils;
 import com.voting_system.bulletin_board.crypto.RsaBssaVerifier;
-import com.voting_system.bulletin_board.dto.VoteRequestDto;
-import com.voting_system.bulletin_board.dto.VoteResponseDto;
+import com.voting_system.bulletin_board.dto.CreateVoteRequestDto;
+import com.voting_system.bulletin_board.dto.CreateVoteResponseDto;
+import com.voting_system.bulletin_board.dto.VoteRecordResponseDto;
 import com.voting_system.bulletin_board.exceptions.DuplicateVoteException;
 import com.voting_system.bulletin_board.exceptions.VoteVerificationException;
 import com.voting_system.bulletin_board.model.VoteModel;
@@ -33,13 +37,13 @@ public class VoteServiceAdapter implements IVoteService {
     private final RsaBssaVerifier rsaBssaVerifier;
 
     @Override 
-    public VoteResponseDto submitVote(UUID electionId, VoteRequestDto voteRequest) {
+    public CreateVoteResponseDto submitVote(UUID electionId, CreateVoteRequestDto voteRequest) {
         if(voteRepositoryPort.existsByElectionIdAndSignature(electionId, voteRequest.signature())) {
             throw new DuplicateVoteException();
         }
         
         VoteModel voteModel = voteRequest.toModel(electionId);
-        UUID authorizationKeysId = voteModel.getVote().authorizationKeysId();
+        UUID authorizationKeysId = voteModel.getEncryptedVote().authorizationKeysId();
         
         // Si no existe la clave pública en la caché, la solicitará al servicio la almacenará.
         if(!authorizationPublicKeyCache.hasPublicKey(authorizationKeysId)) {
@@ -52,7 +56,7 @@ public class VoteServiceAdapter implements IVoteService {
         }
         
         ObjectMapper objectMapper = new ObjectMapper();
-        String voteJson = objectMapper.writeValueAsString(voteModel.getVote());
+        String voteJson = objectMapper.writeValueAsString(voteModel.getEncryptedVote());
         String voteJsonCanonicalized = JsonUtils.canonicalize(voteJson);
         
         byte[] calculatedDigest = CryptoUtils.sha3_384(voteJsonCanonicalized);
@@ -71,7 +75,19 @@ public class VoteServiceAdapter implements IVoteService {
             throw new VoteVerificationException();
         }
         
+        // Este código me sirve para meter votos y realizar pruebas
+        // byte[] firmaRandom = new byte[384];
+        // new SecureRandom().nextBytes(firmaRandom);
+        // voteModel.setSignature(Base64.getEncoder().encodeToString(firmaRandom));
+
         voteModel = voteRepositoryPort.save(voteModel);
-        return new VoteResponseDto(voteModel.getId());
+        return new CreateVoteResponseDto(voteModel.getId());
+    }
+
+    @Override
+    public Page<VoteRecordResponseDto> getVotes(UUID electionId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return voteRepositoryPort.findAllByElectionId(electionId, pageable)
+            .map(VoteRecordResponseDto::from);
     }
 }

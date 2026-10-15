@@ -1,6 +1,8 @@
 package com.voting_system.bulletin_board.repository;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.voting_system.bulletin_board.entity.JpaVoteEntity;
@@ -26,5 +28,11 @@ public class VoteRepositoryAdapter implements VoteRepositoryPort {
     @Override 
     public boolean existsByElectionIdAndSignature(UUID electionId, String signature) {
         return jpaVoteRepository.existsByElectionIdAndSignature(electionId, signature);
+    }
+
+    @Override 
+    public Page<VoteModel> findAllByElectionId(UUID electionId, Pageable pageable) {
+        return jpaVoteRepository.findAllByElectionId(electionId, pageable)
+            .map(voteMapper::toModel);
     }
 }
