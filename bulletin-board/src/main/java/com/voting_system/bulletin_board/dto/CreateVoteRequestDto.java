@@ -7,7 +7,7 @@ import com.voting_system.bulletin_board.model.VoteModel;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-public record VoteRequest(
+public record CreateVoteRequestDto(
     @NotNull 
     EncryptedVote encryptedVote,
     
@@ -23,7 +23,7 @@ public record VoteRequest(
     public VoteModel toModel(UUID electionId) {
         return VoteModel.builder()
             .electionId(electionId)
-            .vote(encryptedVote)
+            .encryptedVote(encryptedVote)
             .randomizer(randomizer)
             .digest(digest)
             .signature(signature)

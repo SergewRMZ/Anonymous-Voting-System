@@ -4,11 +4,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.voting_system.tally_service.dto.EncryptionKeyDtoResponse;
-import com.voting_system.tally_service.dto.UpdateEncryptionKeyStatusDto;
 import com.voting_system.tally_service.model.EncryptionKeyModel;
 import com.voting_system.tally_service.service.EncryptionKeyService;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
@@ -18,16 +16,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
+
 @RestController 
-@RequestMapping ("/api/tally-service/elections")
+@RequestMapping ("/api/tally-service/elections/{electionId}")
 @RequiredArgsConstructor 
 public class EncryptionKeyController {
     private final EncryptionKeyService encryptionKeyService;
 
-    @PostMapping("/{electionId}/encryption-keys")
+    @PostMapping("/encryption-keys")
     public ResponseEntity<EncryptionKeyDtoResponse> create(@PathVariable UUID electionId) {
         EncryptionKeyModel model = encryptionKeyService.createEncryptionKeys(electionId);
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -35,29 +33,28 @@ public class EncryptionKeyController {
         );
     }
 
-    @PatchMapping("/{electionId}/encryption-keys/status")
+    @PatchMapping("/encryption-keys/activate")
     public ResponseEntity<EncryptionKeyDtoResponse> updateStatus(
-        @PathVariable UUID electionId,
-        @Valid @RequestBody UpdateEncryptionKeyStatusDto request
+        @PathVariable UUID electionId
     ) {
 
-        EncryptionKeyModel model = encryptionKeyService.setEncryptionKeyStatus(electionId, request);
+        EncryptionKeyModel model = encryptionKeyService.activateEncryptionKeys(electionId);
         return ResponseEntity.status(HttpStatus.OK).body(
             EncryptionKeyDtoResponse.from(model)
         );
     }
 
-    @GetMapping("/{electionId}/encryption-keys/public")
-    public ResponseEntity<EncryptionKeyDtoResponse> getMethodName(@PathVariable UUID electionId) {
+    @GetMapping("/encryption-keys/public")
+    public ResponseEntity<EncryptionKeyDtoResponse> getPublicKeyByElectionId(@PathVariable UUID electionId) {
         EncryptionKeyModel model = encryptionKeyService.getPublicEncryptionKey(electionId);
         return ResponseEntity.status(HttpStatus.OK).body(EncryptionKeyDtoResponse.from(model));
     }
-    
 
-    // ENDPOINT DE PRUEBA, ESTE LO USARÉ PARA PROBAR DESCIFRADO
-    @PostMapping("/decrypt")
-    public String decryptVote(@RequestBody String message) {
-        return "Decrypt Function";
+    @PostMapping("/tally")
+    public ResponseEntity<?> tallyVotes(@PathVariable UUID electionId) {
+        
+        
+        return ResponseEntity.ok("Conteo de votos");
     }
     
 }

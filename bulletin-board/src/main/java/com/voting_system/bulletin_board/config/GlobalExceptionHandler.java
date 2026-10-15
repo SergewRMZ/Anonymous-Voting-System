@@ -13,6 +13,8 @@ import com.voting_system.bulletin_board.exceptions.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // Para errores al reconstruir la clave pública de RSA
     @ExceptionHandler(RSAPublicKeyException.class)
     public ProblemDetail handleCreatedKeyAlreadyExistsException(RSAPublicKeyException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -25,6 +27,7 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    // Para errores de verificación del voto.
     @ExceptionHandler (VoteVerificationException.class)
     public ProblemDetail handleVoteVerificationException(VoteVerificationException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -35,6 +38,7 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    // Para errores durante las operaciones criptográficas.
     @ExceptionHandler (CryptographicOperationException.class)
     public ProblemDetail handleCryptographicOperationException(CryptographicOperationException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -43,6 +47,18 @@ public class GlobalExceptionHandler {
         );
 
         problemDetail.setTitle("Internal Cryptographic Error");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (DuplicateVoteException.class)
+    public ProblemDetail handleDuplicateVoteException(DuplicateVoteException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, 
+            ex.getMessage()
+        );
+
+        problemDetail.setTitle("Duplicate Vote");
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }

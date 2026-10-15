@@ -16,6 +16,11 @@ public class AuthorizationPublicKeyCache {
     }
 
     public void put(UUID authorizationKeysId, PublicKey publicKey) {
+        System.out.println("Agregando clave pública");
         keys.put(authorizationKeysId, publicKey);
+    }
+
+    public boolean hasPublicKey(UUID authorizationKeysId) {
+        return keys.containsKey(authorizationKeysId);
     }
 }

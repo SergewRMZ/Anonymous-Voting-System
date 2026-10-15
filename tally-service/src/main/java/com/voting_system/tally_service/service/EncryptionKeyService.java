@@ -5,7 +5,6 @@ import java.util.Base64;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
-import com.voting_system.tally_service.dto.UpdateEncryptionKeyStatusDto;
 import com.voting_system.tally_service.exception.EncryptionKeysAlreadyExists;
 import com.voting_system.tally_service.exception.EncryptionKeysNotFound;
 import com.voting_system.tally_service.model.EncryptionKeyModel;
@@ -45,7 +44,7 @@ public class EncryptionKeyService implements IEncryptionKeyService {
     }
 
     @Override 
-    public EncryptionKeyModel setEncryptionKeyStatus(UUID electionId, UpdateEncryptionKeyStatusDto request) {
+    public EncryptionKeyModel activateEncryptionKeys(UUID electionId) {
         EncryptionKeyModel encryptionKeyModel = encryptionKeyRepository.findByElectionId(electionId)
             .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
         

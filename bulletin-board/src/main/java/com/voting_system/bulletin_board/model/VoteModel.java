@@ -6,15 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter 
+@Getter @Setter 
 @NoArgsConstructor 
 @AllArgsConstructor 
 @Builder 
 public class VoteModel {
     private UUID id;
     private UUID electionId;
-    private EncryptedVote vote;
+    private EncryptedVote encryptedVote;
     private String randomizer;
     private String digest;
     private String signature;
