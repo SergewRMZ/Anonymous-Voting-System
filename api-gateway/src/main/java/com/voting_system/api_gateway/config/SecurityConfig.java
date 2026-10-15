@@ -25,18 +25,37 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity serverHttpSecurity) {
         return serverHttpSecurity
             // CSRF solo es necesaria cuando se trabaja con cookies
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
+            .csrf(csrf -> csrf.disable())
             .authorizeExchange(exchanges -> exchanges
 
-                // Endpoints para realizar pruebas
-                .pathMatchers("/api/tally-service/elections/**").permitAll()
-                
+                // Tally Service
+                .pathMatchers(
+                    HttpMethod.GET, 
+                    "/api/tally-service/elections/*/encryption-keys/public"
+                ).permitAll()
+
+                .pathMatchers(
+                    HttpMethod.POST, 
+                    "/api/tally-service/elections/*/encryption-keys"
+                ).hasRole(UserRole.AUTHORITY.name())
+
+                .pathMatchers(
+                    HttpMethod.POST,
+                    "/api/tally-service/elections/*/tally"
+                ).hasRole(UserRole.AUTHORITY.name())
+
+                .pathMatchers(
+                    HttpMethod.PATCH,
+                    "/api/tally-service/elections/*/encryption-keys/activate"
+                ).hasRole(UserRole.AUTHORITY.name())
+
                 // Public endpoints
                 .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
 
                 // bulletin-board
                 .pathMatchers(HttpMethod.POST, "/api/bulletin-board/elections/*/votes").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/bulletin-board/elections/*/votes").permitAll()
+                
                 // authentication-service
                 .pathMatchers(HttpMethod.POST, "/api/auth/admin").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())
