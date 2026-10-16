@@ -31,8 +31,18 @@ public class VoteRepositoryAdapter implements VoteRepositoryPort {
     }
 
     @Override 
-    public Page<VoteModel> findAllByElectionId(UUID electionId, Pageable pageable) {
-        return jpaVoteRepository.findAllByElectionId(electionId, pageable)
+    public Page<VoteModel> findAllByElectionIdAndCandidacy(
+        UUID electionId,
+        UUID electionPositionId,
+        UUID candidacyId,
+        Pageable pageable
+    ) {
+        return jpaVoteRepository.findAllByElectionIdAndCandidacy(
+            electionId,
+            electionPositionId,
+            candidacyId,
+            pageable
+        )
             .map(voteMapper::toModel);
     }
 }

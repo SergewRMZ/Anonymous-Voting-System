@@ -10,5 +10,10 @@ import com.voting_system.bulletin_board.model.VoteModel;
 public interface VoteRepositoryPort {
     public VoteModel save(VoteModel vote);
     public boolean existsByElectionIdAndSignature(UUID electionId, String signature);
-    public Page<VoteModel> findAllByElectionId(UUID electionId, Pageable pageable);
+    public Page<VoteModel> findAllByElectionIdAndCandidacy(
+        UUID electionId,
+        UUID electionPositionId,
+        UUID candidacyId,
+        Pageable pageable
+    );
 }

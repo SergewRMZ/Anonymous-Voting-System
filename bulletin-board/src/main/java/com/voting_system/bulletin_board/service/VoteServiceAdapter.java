@@ -85,9 +85,20 @@ public class VoteServiceAdapter implements IVoteService {
     }
 
     @Override
-    public Page<VoteRecordResponseDto> getVotes(UUID electionId, int page, int size) {
+    public Page<VoteRecordResponseDto> getVotes(
+        UUID electionId,
+        UUID electionPositionId,
+        UUID candidacyId,
+        int page,
+        int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
-        return voteRepositoryPort.findAllByElectionId(electionId, pageable)
+        return voteRepositoryPort.findAllByElectionIdAndCandidacy(
+            electionId,
+            electionPositionId,
+            candidacyId,
+            pageable
+        )
             .map(VoteRecordResponseDto::from);
     }
 }

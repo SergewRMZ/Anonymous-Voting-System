@@ -41,6 +41,8 @@ public class VoteController {
     @GetMapping("/{electionId}/votes")
     public ResponseEntity<Page<VoteRecordResponseDto>> getVotes(
         @PathVariable UUID electionId,
+        @RequestParam(required = false) UUID electionPositionId,
+        @RequestParam(required = false) UUID candidacyId,
         @RequestParam (defaultValue = "0") int page,
         @RequestParam (defaultValue = "10") int size
     
@@ -53,6 +55,8 @@ public class VoteController {
             );
         }
 
-        return ResponseEntity.ok(voteService.getVotes(electionId, page, size));
+        return ResponseEntity.ok(
+            voteService.getVotes(electionId, electionPositionId, candidacyId, page, size)
+        );
     }
 }
