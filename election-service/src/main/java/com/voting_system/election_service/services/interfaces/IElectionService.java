@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.voting_system.election_service.domain.ElectionModel;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
+import com.voting_system.election_service.dto.GetElectionStatusDto;
 
 public interface IElectionService {
     public ElectionModel createElection(CreateElectionDtoRequest createElectionDtoRequest);
@@ -14,4 +15,5 @@ public interface IElectionService {
     public ElectionModel activateElection(UUID electionId);
     public List<ElectionModel> getElections(List<String> roles);
     public ElectionDetailsDtoResponse getElectionDetails(UUID electionId, List<String> roles);
+    public GetElectionStatusDto getElectionStatus(UUID electionId);
 }

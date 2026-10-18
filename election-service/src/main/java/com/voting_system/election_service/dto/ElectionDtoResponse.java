@@ -20,5 +20,4 @@ public record ElectionDtoResponse(
             electionModel.getEndDate(), 
             electionModel.getStatus());
     }
-
 }

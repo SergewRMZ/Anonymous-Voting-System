@@ -19,7 +19,9 @@ import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionCandidacyDtoResponse;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.ElectionPositionDetailsDtoResponse;
+import com.voting_system.election_service.dto.GetElectionStatusDto;
 import com.voting_system.election_service.exceptions.CandidateNotFoundException;
+import com.voting_system.election_service.exceptions.ElectionNotAllowedException;
 import com.voting_system.election_service.exceptions.ElectionNotFoundException;
 import com.voting_system.election_service.exceptions.PositionNotFoundException;
 import com.voting_system.election_service.repository.interfaces.ICandidacyRepository;
@@ -77,6 +79,11 @@ public class ElectionService implements IElectionService {
         return electionRepository.save(electionModel);
     }
 
+    @Override 
+    public GetElectionStatusDto getElectionStatus(UUID electionId) {
+        return electionRepository.findElectionStatusByElectionId(electionId);
+    }
+
 
     @Override 
     public List<ElectionModel> getElections(List<String> roles) {
@@ -92,9 +99,7 @@ public class ElectionService implements IElectionService {
 
         // Check if the election's status is allowed for the user's roles.
         if (!allowedStatuses.contains(election.getStatus())) {
-            throw new ElectionNotFoundException(
-                "This user doesn't have permission to view election with ID: " + electionId
-            );
+            throw new ElectionNotAllowedException(electionId);
         }
 
         List<ElectionPositionModel> electionPositions = electionPositionRepository.getByElectionId(electionId);

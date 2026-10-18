@@ -30,7 +30,7 @@ public class ElectionPositionRepositoryAdapter implements IElectionPositionRepos
     @Override 
     public ElectionPositionModel save(ElectionPositionModel model) {
         JpaElectionEntity electionEntity = jpaElectionRepository.findById(model.getElectionId())
-            .orElseThrow(() -> new ElectionNotFoundException("Election Not Found with ID:" + model.getElectionId()));
+            .orElseThrow(() -> new ElectionNotFoundException(model.getElectionId()));
 
         JpaPositionEntity positionEntity = jpaPositionRepository.findById(model.getPositionId())
             .orElseThrow(() -> new PositionNotFoundException("Electoral Position not found with ID:" + model.getPositionId()));
