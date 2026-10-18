@@ -12,7 +12,6 @@ import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.stereotype.Component;
 
 import com.voting_system.bulletin_board.exceptions.CryptographicOperationException;

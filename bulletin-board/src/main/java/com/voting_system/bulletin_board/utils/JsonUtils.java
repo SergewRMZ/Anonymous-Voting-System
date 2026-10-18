@@ -1,8 +1,6 @@
 package com.voting_system.bulletin_board.utils;
 
 import org.erdtman.jcs.JsonCanonicalizer;
-import org.springframework.stereotype.Component;
-
 /**
  * Utilidad para canonicalizar el JSON de acuerdo 
  * con el estándar RFC 8785.

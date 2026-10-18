@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 
 
 @Service 
-public class ElGamalEncryption {
+public class ElGamalKeyGenerator {
     private final X9ECParameters params;
     private AsymmetricCipherKeyPair keyPair;
-    public ElGamalEncryption() {
+    public ElGamalKeyGenerator() {
         this.params = SECNamedCurves.getByName("secp256k1");
     }
 

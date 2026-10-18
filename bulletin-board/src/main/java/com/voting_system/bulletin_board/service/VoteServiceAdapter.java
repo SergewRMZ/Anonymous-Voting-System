@@ -1,8 +1,8 @@
 package com.voting_system.bulletin_board.service;
 
 import java.security.PublicKey;
-import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -21,6 +21,7 @@ import com.voting_system.bulletin_board.dto.VoteRecordResponseDto;
 import com.voting_system.bulletin_board.exceptions.DuplicateVoteException;
 import com.voting_system.bulletin_board.exceptions.VoteVerificationException;
 import com.voting_system.bulletin_board.model.VoteModel;
+import com.voting_system.bulletin_board.repository.VoteBallotProjection;
 import com.voting_system.bulletin_board.repository.interfaces.VoteRepositoryPort;
 import com.voting_system.bulletin_board.service.interfaces.IVoteService;
 import com.voting_system.bulletin_board.utils.JsonUtils;
@@ -89,5 +90,16 @@ public class VoteServiceAdapter implements IVoteService {
         Pageable pageable = PageRequest.of(page, size);
         return voteRepositoryPort.findAllByElectionId(electionId, pageable)
             .map(VoteRecordResponseDto::from);
+    }
+
+    public List<VoteBallotProjection> getBallotsByPositionAndCandidacy(
+        UUID electionId,
+        UUID electionPositionId,
+        UUID candidacyId
+    ) {
+        
+        return voteRepositoryPort
+            .findBallotsByElectionPositionIdAndCandidacyId(
+                electionId, electionPositionId, candidacyId);
     }
 }

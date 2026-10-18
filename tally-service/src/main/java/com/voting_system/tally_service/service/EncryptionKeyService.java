@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class EncryptionKeyService implements IEncryptionKeyService {
     private final EncryptionKeyRepositoryAdapter encryptionKeyRepository;
     private final PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
-    private final ElGamalEncryption elGamalEncryption;
+    private final ElGamalKeyGenerator elGamalKeyGenerator;
 
     @Override 
     public EncryptionKeyModel createEncryptionKeys(UUID electionId) {
@@ -27,10 +27,10 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             throw new EncryptionKeysAlreadyExists("Encryption keys already exists for this election: " + electionId);
         }
 
-        elGamalEncryption.generateKeys();
+        elGamalKeyGenerator.generateKeys();
         String publicKey = Base64
             .getEncoder()
-            .encodeToString(elGamalEncryption.getPublicKey());
+            .encodeToString(elGamalKeyGenerator.getPublicKey());
 
         EncryptionKeyModel encryptionKeyModel = EncryptionKeyModel.builder()
             .electionId(electionId)
@@ -39,7 +39,7 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             .createdAt(Instant.now())
             .build();
 
-        privateEncryptionKeyRepository.savePrivateKey(electionId, elGamalEncryption.getPrivateKey());
+        privateEncryptionKeyRepository.savePrivateKey(electionId, elGamalKeyGenerator.getPrivateKey());
         return encryptionKeyRepository.save(encryptionKeyModel);
     }
 

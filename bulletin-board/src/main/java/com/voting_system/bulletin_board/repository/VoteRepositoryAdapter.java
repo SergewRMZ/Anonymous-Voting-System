@@ -1,4 +1,5 @@
 package com.voting_system.bulletin_board.repository;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -34,5 +35,17 @@ public class VoteRepositoryAdapter implements VoteRepositoryPort {
     public Page<VoteModel> findAllByElectionId(UUID electionId, Pageable pageable) {
         return jpaVoteRepository.findAllByElectionId(electionId, pageable)
             .map(voteMapper::toModel);
+    }
+
+    @Override
+    public List<VoteBallotProjection> findBallotsByElectionPositionIdAndCandidacyId(UUID electionId,
+            UUID electionPositionId, UUID candidacyId) {
+
+        return jpaVoteRepository
+            .findBallotsByElectionPositionIdAndCandidacyId(
+                electionId, 
+                electionPositionId, 
+                candidacyId
+            );
     }
 }

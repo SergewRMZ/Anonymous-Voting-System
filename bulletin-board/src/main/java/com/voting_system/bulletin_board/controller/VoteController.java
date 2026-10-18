@@ -7,11 +7,13 @@ import org.springframework.web.server.ResponseStatusException;
 import com.voting_system.bulletin_board.dto.CreateVoteRequestDto;
 import com.voting_system.bulletin_board.dto.CreateVoteResponseDto;
 import com.voting_system.bulletin_board.dto.VoteRecordResponseDto;
+import com.voting_system.bulletin_board.repository.VoteBallotProjection;
 import com.voting_system.bulletin_board.service.interfaces.IVoteService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -25,12 +27,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController 
-@RequestMapping ("/api/bulletin-board/elections")
+@RequestMapping ("/api/bulletin-board/elections/{electionId}")
 @RequiredArgsConstructor
 public class VoteController {
     private final IVoteService voteService;
 
-    @PostMapping("/{electionId}/votes")
+    @PostMapping("/votes")
     public ResponseEntity<CreateVoteResponseDto> submitVote(
         @PathVariable UUID electionId,
         @Valid @RequestBody CreateVoteRequestDto request
@@ -38,7 +40,7 @@ public class VoteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(voteService.submitVote(electionId, request));
     }
 
-    @GetMapping("/{electionId}/votes")
+    @GetMapping("/votes")
     public ResponseEntity<Page<VoteRecordResponseDto>> getVotes(
         @PathVariable UUID electionId,
         @RequestParam (defaultValue = "0") int page,
@@ -54,5 +56,19 @@ public class VoteController {
         }
 
         return ResponseEntity.ok(voteService.getVotes(electionId, page, size));
+    }    
+
+    @GetMapping("/positions/{electionPositionId}/candidacies/{candidacyId}/ballots")
+    public ResponseEntity<List<VoteBallotProjection>> getBallotsByPositionAndCandidacy(
+        @PathVariable UUID electionId,
+        @PathVariable UUID electionPositionId,
+        @PathVariable UUID candidacyId
+    ) {
+
+        return ResponseEntity.ok(
+            voteService.getBallotsByPositionAndCandidacy(
+                electionId, electionPositionId, candidacyId)
+        );
     }
+    
 }

@@ -58,7 +58,6 @@ public class ElectionController {
         return ResponseEntity.ok(ElectionDtoResponse.from(electionModel));
     }
 
-
     @GetMapping("")
     public ResponseEntity<List<ElectionDtoResponse>> getElections(@AuthenticationPrincipal Jwt jwt) {
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
