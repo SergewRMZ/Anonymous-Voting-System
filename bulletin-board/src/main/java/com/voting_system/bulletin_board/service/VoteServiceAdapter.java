@@ -2,7 +2,6 @@ package com.voting_system.bulletin_board.service;
 
 import java.security.PublicKey;
 import java.util.Base64;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -92,14 +91,16 @@ public class VoteServiceAdapter implements IVoteService {
             .map(VoteRecordResponseDto::from);
     }
 
-    public List<VoteBallotProjection> getBallotsByPositionAndCandidacy(
+    public Page<VoteBallotProjection> getBallotsByPositionAndCandidacy(
         UUID electionId,
         UUID electionPositionId,
-        UUID candidacyId
+        UUID candidacyId,
+        int page,
+        int size
     ) {
-        
+        Pageable pageable = PageRequest.of(page, size);
         return voteRepositoryPort
             .findBallotsByElectionPositionIdAndCandidacyId(
-                electionId, electionPositionId, candidacyId);
+                electionId, electionPositionId, candidacyId, pageable);
     }
 }

@@ -1,5 +1,4 @@
 package com.voting_system.bulletin_board.repository.jpa;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -28,10 +27,22 @@ public interface JpaVoteRepository extends JpaRepository<JpaVoteEntity, UUID> {
         WHERE v.election_id = :electionId
           AND (pos->>'electionPositionId')::uuid = :electionPositionId
           AND (ballots->>'candidacyId')::uuid = :candidacyId
-        """, nativeQuery = true)
-    public List<VoteBallotProjection> findBallotsByElectionPositionIdAndCandidacyId(
+        """, 
+        countQuery = """
+            SELECT count(*)
+            FROM votes v,
+            LATERAL jsonb_array_elements(v.vote->'positions') AS pos,
+            LATERAL jsonb_array_elements(pos->'ballots') AS ballots
+            WHERE v.election_id = :electionId
+              AND (pos->>'electionPositionId')::uuid = :electionPositionId
+              AND (ballots->>'candidacyId')::uuid = :candidacyId
+            """,
+        nativeQuery = true)
+
+    public Page<VoteBallotProjection> findBallotsByElectionPositionIdAndCandidacyId(
         @Param("electionId") UUID electionId,
         @Param("electionPositionId") UUID electionPositionId,
-        @Param("candidacyId") UUID candidacyId
+        @Param("candidacyId") UUID candidacyId,
+        Pageable pageable
     );
 }

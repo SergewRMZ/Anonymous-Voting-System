@@ -1,6 +1,4 @@
 package com.voting_system.bulletin_board.repository.interfaces;
-
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -13,5 +11,6 @@ public interface VoteRepositoryPort {
     public VoteModel save(VoteModel vote);
     public boolean existsByElectionIdAndSignature(UUID electionId, String signature);
     public Page<VoteModel> findAllByElectionId(UUID electionId, Pageable pageable);
-    public List<VoteBallotProjection> findBallotsByElectionPositionIdAndCandidacyId(UUID electionId, UUID electionPositionId, UUID candidacyId);
+    public Page<VoteBallotProjection> findBallotsByElectionPositionIdAndCandidacyId(
+        UUID electionId, UUID electionPositionId, UUID candidacyId, Pageable pageable);
 }

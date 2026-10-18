@@ -13,7 +13,6 @@ import com.voting_system.bulletin_board.service.interfaces.IVoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -59,15 +58,24 @@ public class VoteController {
     }    
 
     @GetMapping("/positions/{electionPositionId}/candidacies/{candidacyId}/ballots")
-    public ResponseEntity<List<VoteBallotProjection>> getBallotsByPositionAndCandidacy(
+    public ResponseEntity<Page<VoteBallotProjection>> getBallotsByPositionAndCandidacy(
         @PathVariable UUID electionId,
         @PathVariable UUID electionPositionId,
-        @PathVariable UUID candidacyId
+        @PathVariable UUID candidacyId,
+        @RequestParam (defaultValue = "0") int page,
+        @RequestParam (defaultValue = "10") int size
     ) {
+
+         if(page < 0 || size < 1) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Page must be non-negative value and size must be greater that one"
+            );
+        }
 
         return ResponseEntity.ok(
             voteService.getBallotsByPositionAndCandidacy(
-                electionId, electionPositionId, candidacyId)
+                electionId, electionPositionId, candidacyId, page, size)
         );
     }
     

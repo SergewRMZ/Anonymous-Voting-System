@@ -1,5 +1,4 @@
 package com.voting_system.bulletin_board.service.interfaces;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -11,5 +10,6 @@ import com.voting_system.bulletin_board.repository.VoteBallotProjection;
 public interface IVoteService {
     public CreateVoteResponseDto submitVote(UUID electionId, CreateVoteRequestDto voteRequest);
     public Page<VoteRecordResponseDto> getVotes(UUID electionId, int page, int size);
-    public List<VoteBallotProjection> getBallotsByPositionAndCandidacy(UUID electionId, UUID electionPositionId, UUID candidacyId);
+    public Page<VoteBallotProjection> getBallotsByPositionAndCandidacy(
+        UUID electionId, UUID electionPositionId, UUID candidacyId, int page, int size);
 }
