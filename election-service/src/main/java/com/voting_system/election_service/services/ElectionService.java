@@ -20,9 +20,9 @@ import com.voting_system.election_service.dto.ElectionCandidacyDtoResponse;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.ElectionPositionDetailsDtoResponse;
 import com.voting_system.election_service.dto.GetElectionStatusDto;
+import com.voting_system.election_service.dto.GetElectionStructureDto;
 import com.voting_system.election_service.exceptions.CandidateNotFoundException;
 import com.voting_system.election_service.exceptions.ElectionNotAllowedException;
-import com.voting_system.election_service.exceptions.ElectionNotFoundException;
 import com.voting_system.election_service.exceptions.PositionNotFoundException;
 import com.voting_system.election_service.repository.interfaces.ICandidacyRepository;
 import com.voting_system.election_service.repository.interfaces.ICandidateRepository;
@@ -84,11 +84,15 @@ public class ElectionService implements IElectionService {
         return electionRepository.findElectionStatusByElectionId(electionId);
     }
 
-
     @Override 
     public List<ElectionModel> getElections(List<String> roles) {
         List<ElectionStatus> allowedStatuses = getAllowedStatusesForRoles(roles);
         return electionRepository.findByStatusIn(allowedStatuses);
+    }
+
+    @Override 
+    public GetElectionStructureDto getElectionStructure(UUID electionId) {
+        return electionRepository.findElectionStructureByElectionId(electionId);
     }
 
     @Override

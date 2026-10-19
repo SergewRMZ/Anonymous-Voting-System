@@ -13,6 +13,6 @@ public class BulletinBoardServiceClient {
 
     @Value("${services.bulletin-board-service.base-url}")
     private String bulletinBoardServiceBaseUrl;
-
+    
     
 }

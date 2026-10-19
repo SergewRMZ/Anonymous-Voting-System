@@ -7,6 +7,7 @@ import com.voting_system.election_service.domain.ElectionModel;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.GetElectionStatusDto;
+import com.voting_system.election_service.dto.GetElectionStructureDto;
 
 public interface IElectionService {
     public ElectionModel createElection(CreateElectionDtoRequest createElectionDtoRequest);
@@ -16,4 +17,5 @@ public interface IElectionService {
     public List<ElectionModel> getElections(List<String> roles);
     public ElectionDetailsDtoResponse getElectionDetails(UUID electionId, List<String> roles);
     public GetElectionStatusDto getElectionStatus(UUID electionId);
+    public GetElectionStructureDto getElectionStructure(UUID electionId);
 }
