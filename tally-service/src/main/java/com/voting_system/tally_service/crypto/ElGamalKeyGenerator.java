@@ -1,4 +1,4 @@
-package com.voting_system.tally_service.service;
+package com.voting_system.tally_service.crypto;
 
 import java.security.SecureRandom;
 
@@ -10,10 +10,10 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 
-@Service 
+@Component  
 public class ElGamalKeyGenerator {
     private final X9ECParameters params;
     private AsymmetricCipherKeyPair keyPair;

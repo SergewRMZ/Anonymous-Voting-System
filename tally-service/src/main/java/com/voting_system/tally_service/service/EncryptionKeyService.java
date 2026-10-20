@@ -5,6 +5,8 @@ import java.util.Base64;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+
+import com.voting_system.tally_service.crypto.ElGamalKeyGenerator;
 import com.voting_system.tally_service.exception.EncryptionKeysAlreadyExists;
 import com.voting_system.tally_service.exception.EncryptionKeysNotFound;
 import com.voting_system.tally_service.model.EncryptionKeyModel;
