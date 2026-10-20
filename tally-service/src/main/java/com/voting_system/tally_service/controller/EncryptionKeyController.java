@@ -49,12 +49,4 @@ public class EncryptionKeyController {
         EncryptionKeyModel model = encryptionKeyService.getPublicEncryptionKey(electionId);
         return ResponseEntity.status(HttpStatus.OK).body(EncryptionKeyDtoResponse.from(model));
     }
-
-    @PostMapping("/tally")
-    public ResponseEntity<?> tallyVotes(@PathVariable UUID electionId) {
-        
-        
-        return ResponseEntity.ok("Conteo de votos");
-    }
-    
 }

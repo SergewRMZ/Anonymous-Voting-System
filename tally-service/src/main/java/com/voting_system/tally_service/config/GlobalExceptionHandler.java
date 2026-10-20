@@ -40,4 +40,14 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler (ElectionNotClosedException.class)
+    public ProblemDetail handleElectionNotClosedException(ElectionNotClosedException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Invalid Election Status");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }
