@@ -41,9 +41,8 @@ public class TallyService {
         }
 
         GetElectionStructureDto response = electionServiceClient.getElectionStructureDto(electionId);
-        
         List<EncryptedResult> encryptedResults = new ArrayList<>();
-
+        
         response.positions().forEach(position -> 
             position.candidacies().forEach(candidacyId -> 
                 encryptedResults.add(
