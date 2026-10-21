@@ -37,11 +37,11 @@ public class ElGamalAcumulator {
         accumulatedC2 = accumulatedC2.add(pointC2);
     }
 
-    public String getAccumulatedC1() {
-        return CryptoUtils.bytesToBase64(accumulatedC1.getEncoded(true));
+    public byte[] getAccumulatedC1() {
+        return accumulatedC1.getEncoded(true);
     }
 
-    public String getAccumulatedC2() {
-        return CryptoUtils.bytesToBase64(accumulatedC2.getEncoded(true));
+    public byte[] getAccumulatedC2() {
+        return accumulatedC2.getEncoded(true);
     }
 }

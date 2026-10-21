@@ -50,4 +50,24 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler (InvalidEllipticCurvePointsException.class)
+    public ProblemDetail handleInvalidEllipticCurvePointsException(InvalidEllipticCurvePointsException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Invalid elliptic curve point");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (DiscreteLogNotFoundException.class)
+    public ProblemDetail handleDiscreteLogNotFoundException(DiscreteLogNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Error during vote tallying");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }

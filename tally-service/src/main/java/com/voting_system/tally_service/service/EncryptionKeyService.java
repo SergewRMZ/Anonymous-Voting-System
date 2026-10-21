@@ -38,6 +38,7 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             .electionId(electionId)
             .publicKey(publicKey)
             .status(KeyStatus.CREATED)
+
             .createdAt(Instant.now())
             .build();
 
@@ -60,3 +61,4 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
     }
 }
+

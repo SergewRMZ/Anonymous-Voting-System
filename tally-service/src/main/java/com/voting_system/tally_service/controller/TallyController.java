@@ -24,8 +24,7 @@ public class TallyController {
     private final TallyService tallyService;
 
     @PostMapping("/tally")
-    public ResponseEntity<String> tallyVotes(@PathVariable UUID electionId) {
+    public ResponseEntity<?> tallyVotes(@PathVariable UUID electionId) {
         return ResponseEntity.ok(tallyService.tallyVotes(electionId));
     }
-    
 }

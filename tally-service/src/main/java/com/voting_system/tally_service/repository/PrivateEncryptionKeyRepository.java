@@ -72,15 +72,15 @@ public class PrivateEncryptionKeyRepository {
         }
     }
 
-    public void savePrivateKey(UUID authorizationKeysId, byte[] privateKeyBytes) {
+    public void savePrivateKey(UUID electionId, byte[] privateKeyBytes) {
         saveKeyToPem(
-            authorizationKeysId + PRIVATE_KEY_EXTENSION, 
+            electionId + PRIVATE_KEY_EXTENSION, 
             "PRIVATE KEY", 
             privateKeyBytes
         );
     }
 
-    public byte[] readPrivateKey(UUID authorizationKeysId) {
-        return readKeyFromPem(authorizationKeysId + PRIVATE_KEY_EXTENSION);
+    public byte[] readPrivateKey(UUID electionId) {
+        return readKeyFromPem(electionId + PRIVATE_KEY_EXTENSION);
     }
 }

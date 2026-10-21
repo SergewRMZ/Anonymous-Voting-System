@@ -1,5 +1,9 @@
 package com.voting_system.tally_service.service;
 
+import java.math.BigInteger;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +17,11 @@ import com.voting_system.tally_service.client.dto.PageResponseDto;
 import com.voting_system.tally_service.client.dto.VoteBallotDto;
 import com.voting_system.tally_service.crypto.CryptoUtils;
 import com.voting_system.tally_service.crypto.ElGamalAcumulator;
+import com.voting_system.tally_service.crypto.ElGamalDecryptor;
+import com.voting_system.tally_service.crypto.EncryptedResult;
 import com.voting_system.tally_service.exception.ElectionNotClosedException;
+import com.voting_system.tally_service.model.TallyModel;
+import com.voting_system.tally_service.repository.PrivateEncryptionKeyRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,30 +31,64 @@ public class TallyService {
     private final BulletinBoardServiceClient bulletinBoardServiceClient;
     private final ElectionServiceClient electionServiceClient;
     private final ElGamalAcumulator elGamalAcumulator;
+    private final ElGamalDecryptor elGamalDecryptor;
+    private final PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
 
-    public String tallyVotes(UUID electionId) {
+    public List<TallyModel> tallyVotes(UUID electionId) {
         GetElectionStatusDto getElectionStatusResponse = electionServiceClient.getElectionStatus(electionId);
         if(getElectionStatusResponse.status() != ElectionStatus.CLOSED) {
             throw new ElectionNotClosedException(electionId);
         }
 
-        GetElectionStructureDto getElectionStructureResponse = electionServiceClient.getElectionStructureDto(electionId);
-        getElectionStructureResponse.positions().forEach(position -> 
+        GetElectionStructureDto response = electionServiceClient.getElectionStructureDto(electionId);
+        
+        List<EncryptedResult> encryptedResults = new ArrayList<>();
+
+        response.positions().forEach(position -> 
             position.candidacies().forEach(candidacyId -> 
-                processBallots(
-                    electionId, 
-                    position.electionPositionId(), 
-                    candidacyId
-                )
+                encryptedResults.add(
+                    processBallots(
+                        electionId, 
+                        position.electionPositionId(), 
+                        candidacyId
+                ))
             )
         );
-        return "FINALIZADO FALTA DESCIFRAR Y PERSISTIR";
+
+        List<TallyModel> results = processEncryptedResults(electionId, encryptedResults);
+        return results;
     }
 
-    private void processBallots(UUID electionId, UUID electionPositionId, UUID candidacyId) {
+    private List<TallyModel> processEncryptedResults(UUID electionId, List<EncryptedResult> encryptedResults) {
+        BigInteger privateKeyScalar = new BigInteger(1, 
+            privateEncryptionKeyRepository.readPrivateKey(electionId)
+        );
+
+        return encryptedResults.stream()
+            .map(result -> {
+                int votes = elGamalDecryptor.decrypt(
+                    result.c1(), 
+                    result.c2(), 
+                    privateKeyScalar, 
+                    result.ballotCount()
+                );
+
+                return TallyModel.builder()
+                    .electionPositionId(result.electionPositionId())
+                    .candidacyId(result.candidacyId())
+                    .totalVotes(result.ballotCount())
+                    .result(votes)
+                    .createdAt(Instant.now())
+                    .build();
+            })
+            .toList();
+    }
+
+    private EncryptedResult processBallots(UUID electionId, UUID electionPositionId, UUID candidacyId) {
         elGamalAcumulator.resetAccumulator();
         int page = 0;
         int size = 100;
+        int ballotCount = 0;
         boolean last;
         do {
             PageResponseDto<VoteBallotDto> response = bulletinBoardServiceClient
@@ -60,13 +102,18 @@ public class TallyService {
                     )
                 );
 
+            ballotCount += response.content().size();
             last = response.last();
             page++;
         }   while(!last);
 
-        String accumulatedC1 = elGamalAcumulator.getAccumulatedC1();
-        String accumulatedC2 = elGamalAcumulator.getAccumulatedC2();
-        System.out.println(accumulatedC1);
-        System.out.println(accumulatedC2);
+        return new EncryptedResult(
+            electionId,
+            electionPositionId,
+            candidacyId,
+            elGamalAcumulator.getAccumulatedC1(),
+            elGamalAcumulator.getAccumulatedC2(),
+            ballotCount
+        );
     }
 }
