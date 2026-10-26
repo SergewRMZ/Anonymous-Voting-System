@@ -1,5 +1,6 @@
 package com.voting_system.election_service.repository.jpa;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,12 @@ import com.voting_system.election_service.entity.JpaElectionEntity;
 
 public interface JpaElectionRepository extends JpaRepository<JpaElectionEntity, UUID> {
     List<JpaElectionEntity> findAllByStatusIn(List<ElectionStatus> statuses);
+    List<JpaElectionEntity> findAllByStatusAndEndsAtLessThanEqual(ElectionStatus status, Instant now);
+    /**
+     * Consulta identificador y estado de una elección con base en su identificador.
+     * @param electionId Identificador de la elección.
+     * @return
+     */
     @Query ("""
             SELECT 
                 new com.voting_system.election_service.dto.GetElectionStatusDto(

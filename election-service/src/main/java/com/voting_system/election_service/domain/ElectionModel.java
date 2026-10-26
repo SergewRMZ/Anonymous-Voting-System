@@ -67,4 +67,16 @@ public class ElectionModel {
         this.status = ElectionStatus.ACTIVE;
         return;
     }
+
+    public void closedElection(Instant now) {
+        if(this.status != ElectionStatus.ACTIVE) {
+            throw new InvalidElectionStateException("Only ACTIVED elections can be closed");
+        }
+
+        if (this.endDate.isAfter(now)) {
+            throw new InvalidElectionDateException("Cannot close election before its end date");
+        }
+
+        this.status = ElectionStatus.CLOSED;
+    }
 }

@@ -20,10 +20,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "elections")
-@Getter 
+@Getter @Setter 
 @AllArgsConstructor 
 @NoArgsConstructor 
 @Builder 
@@ -47,6 +48,11 @@ public class JpaElectionEntity {
     @Column (nullable = false)
     private Instant endsAt;
 
-    @OneToMany (mappedBy = "election", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany (
+        mappedBy = "election", 
+        cascade = CascadeType.ALL, 
+        orphanRemoval = true, 
+        fetch = FetchType.LAZY
+    )
     private List<JpaElectionPositionEntity> electionPositions;
 }

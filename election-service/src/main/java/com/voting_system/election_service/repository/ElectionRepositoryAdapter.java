@@ -1,5 +1,6 @@
 package com.voting_system.election_service.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,8 +28,22 @@ public class ElectionRepositoryAdapter implements IElectionRepository {
     
     @Override 
     public ElectionModel save(ElectionModel model) {
-        JpaElectionEntity entity = jpaElectionRepository.save(electionMapper.toEntity(model));
-        return electionMapper.toModel(entity);
+        if(model.getId() != null) {
+            JpaElectionEntity entity = jpaElectionRepository.findById(model.getId())
+                .orElseThrow(() -> new ElectionNotFoundException(model.getId()));
+
+            entity.setStatus(model.getStatus());
+            entity.setName(model.getName());
+            entity.setDescription(model.getDescription());
+            entity.setStartsAt(model.getStartDate());
+            entity.setEndsAt(model.getEndDate());
+
+            JpaElectionEntity saved = jpaElectionRepository.save(entity);
+            return electionMapper.toModel(saved);
+        }
+
+        JpaElectionEntity newEntity = jpaElectionRepository.save(electionMapper.toEntity(model));
+        return electionMapper.toModel(newEntity);
     }
 
     @Override
@@ -50,6 +65,15 @@ public class ElectionRepositoryAdapter implements IElectionRepository {
     public List<ElectionModel> findByStatusIn(List<ElectionStatus> statuses) {
         List<JpaElectionEntity> list = jpaElectionRepository.findAllByStatusIn(statuses);
         return list.stream()
+            .map(electionMapper::toModel)
+            .toList();
+    }
+
+    @Override 
+    public List<ElectionModel> findExpiredActiveElections(Instant now) {
+        return jpaElectionRepository
+            .findAllByStatusAndEndsAtLessThanEqual(ElectionStatus.ACTIVE, now)
+            .stream()
             .map(electionMapper::toModel)
             .toList();
     }

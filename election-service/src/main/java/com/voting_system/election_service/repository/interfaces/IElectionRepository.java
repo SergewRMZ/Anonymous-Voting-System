@@ -1,5 +1,6 @@
 package com.voting_system.election_service.repository.interfaces;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ public interface IElectionRepository {
     public List<ElectionModel> getElections();
     public ElectionModel getElection(UUID electionId);
     public List<ElectionModel> findByStatusIn(List<ElectionStatus> statuses);
+    public List<ElectionModel> findExpiredActiveElections(Instant now);
     public GetElectionStatusDto findElectionStatusByElectionId(UUID electionId);
     public GetElectionStructureDto findElectionStructureByElectionId(UUID electionId);
 }

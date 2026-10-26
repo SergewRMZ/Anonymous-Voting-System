@@ -59,7 +59,6 @@ public class BlindSignatureService implements IBlindSignatureService {
             .blindSignature(blindSignatureB64)
             .createdAt(Instant.now())
             .build();
-
         return model;
         // return blindSignatureRepositoryPort.save(model);
     }

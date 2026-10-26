@@ -46,6 +46,11 @@ public class JpaElectionPositionEntity {
     @JoinColumn (name = "position_id", nullable = false)
     private JpaPositionEntity position;
 
-    @OneToMany (mappedBy = "electionPositionEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany (
+        mappedBy = "electionPositionEntity", 
+        cascade = CascadeType.ALL, 
+        orphanRemoval = true, 
+        fetch = FetchType.LAZY
+    )
     private List<JpaCandidacyEntity> candidacies;
 }

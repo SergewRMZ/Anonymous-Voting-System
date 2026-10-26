@@ -18,4 +18,6 @@ public interface IElectionService {
     public ElectionDetailsDtoResponse getElectionDetails(UUID electionId, List<String> roles);
     public GetElectionStatusDto getElectionStatus(UUID electionId);
     public GetElectionStructureDto getElectionStructure(UUID electionId);
+
+    public void closeExpiredElections();
 }

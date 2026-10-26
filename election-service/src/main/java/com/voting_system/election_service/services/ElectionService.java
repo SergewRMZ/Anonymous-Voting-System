@@ -1,5 +1,6 @@
 package com.voting_system.election_service.services;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -57,6 +58,7 @@ public class ElectionService implements IElectionService {
 
 
     @Override 
+    @Transactional 
     public ElectionModel publishElection(UUID electionId) {
         ElectionModel electionModel = electionRepository.getElection(electionId);
         electionModel.publishElection();
@@ -77,6 +79,18 @@ public class ElectionService implements IElectionService {
         ElectionModel electionModel = electionRepository.getElection(electionId);
         electionModel.activateElection();
         return electionRepository.save(electionModel);
+    }
+
+    @Override 
+    @Transactional 
+    public void closeExpiredElections() {
+        Instant now = Instant.now();
+        List<ElectionModel> expiredElections = electionRepository.findExpiredActiveElections(now);
+
+        for(ElectionModel model: expiredElections) {
+            model.closedElection(now);
+            electionRepository.save(model);
+        }
     }
 
     @Override 
