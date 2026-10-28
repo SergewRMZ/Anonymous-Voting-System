@@ -5,8 +5,9 @@ import java.util.UUID;
 import authorization.domain.model.BlindSignaturePublicKeyModel;
 
 public interface IBlindSignaturePublicKeyService {
-    public void loadActiveKeys();
+    public void loadPrivateKeyByAuthorizationKeysId(UUID authorizationKeysId);
     public BlindSignaturePublicKeyModel generateKeys(UUID electionId);
-    public BlindSignaturePublicKeyModel getByElectionId(UUID electionId);
-    public BlindSignaturePublicKeyModel activateKeys(UUID electionId);
+    public BlindSignaturePublicKeyModel getActivePublicKeyByElectionId(UUID electionId);
+    public BlindSignaturePublicKeyModel activateElectionKeys(UUID electionId);
+    public BlindSignaturePublicKeyModel expireActiveElectionKeys(UUID electionId);
 }

@@ -8,6 +8,8 @@ import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPrivateKey;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.BigIntegers;
@@ -18,37 +20,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor 
 public class RsaBssaService {
     private final int N_MODULUS = 3072;
-    private KeyPair keyPair;
+    private ConcurrentHashMap<UUID, PrivateKey> authorizationKeys = new ConcurrentHashMap<>();
 
-    public boolean hasKeysLoaded() {
-        if(this.keyPair != null) return true;
-        return false;
+    public boolean hasKeysLoaded(UUID authorizationKeysId) {
+        return authorizationKeys.containsKey(authorizationKeysId);
     }
 
-    public synchronized void loadKeys(PublicKey publicKey, PrivateKey privateKey) {
-        if(this.keyPair != null) {
-            return;
-        }
-        this.keyPair = new KeyPair(publicKey, privateKey);
+    public void loadKeys(
+        UUID authorizationKeysId,
+        PrivateKey privateKey
+    ) {
+        authorizationKeys.putIfAbsent(authorizationKeysId, privateKey);
     }
     
     public KeyPair generateKeys() {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA", BouncyCastleProvider.PROVIDER_NAME);
             generator.initialize(N_MODULUS);
-            this.keyPair = generator.generateKeyPair();
-            return this.keyPair;
+            return generator.generateKeyPair();
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             throw new RuntimeException("Error durante la generación de claves criptográficas");
         }
     }
 
-    public byte[] getPublicKey() {
-        return this.keyPair.getPublic().getEncoded();
-    }
-
-    public byte[] sign(byte[] blindedMessage) {
-        RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) this.keyPair.getPrivate();
+    public byte[] sign(UUID authorizationKeysId, byte[] blindedMessage) {
+        RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) getPrivateKey(authorizationKeysId);
         BigInteger m = new BigInteger(1, blindedMessage);
         BigInteger d = rsaPrivateKey.getPrivateExponent();
         BigInteger n = rsaPrivateKey.getModulus();
@@ -59,5 +55,17 @@ public class RsaBssaService {
 
         byte[] signatureBytes = BigIntegers.asUnsignedByteArray(k, blindSignature);
         return signatureBytes;
+    }
+
+    private PrivateKey getPrivateKey (UUID authorizationKeysId) {
+        PrivateKey privateKey = authorizationKeys.get(authorizationKeysId);
+        if(privateKey == null) {
+            throw new IllegalStateException(
+                "There's not a private key for authorization keys ID"
+                + authorizationKeysId
+            );
+        }
+
+        return privateKey;
     }
 }

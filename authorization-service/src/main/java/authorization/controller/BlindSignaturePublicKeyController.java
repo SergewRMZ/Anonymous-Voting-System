@@ -39,14 +39,14 @@ public class BlindSignaturePublicKeyController {
     
     @GetMapping("/public")
     public ResponseEntity<BlindSignaturePublicKeyResponse> getPublicKeyByElectionId(@Valid @PathVariable UUID electionId) {
-        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getByElectionId(electionId);
+        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getActivePublicKeyByElectionId(electionId);
         BlindSignaturePublicKeyResponse response = mapper.toResponse(publicKeyModel);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/activate")
     public ResponseEntity<BlindSignaturePublicKeyResponse> activateKeys(@Valid @PathVariable UUID electionId) {
-        BlindSignaturePublicKeyModel model = blindSignaturePublicKeyService.activateKeys(electionId);
+        BlindSignaturePublicKeyModel model = blindSignaturePublicKeyService.activateElectionKeys(electionId);
         BlindSignaturePublicKeyResponse response = mapper.toResponse(model);
         return ResponseEntity.ok(response);
     }

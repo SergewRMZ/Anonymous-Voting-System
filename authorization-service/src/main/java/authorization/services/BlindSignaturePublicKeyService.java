@@ -1,4 +1,5 @@
 package authorization.services;
+import authorization.repository.jpa.JpaBlindSignaturePublicKeyRepository;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -27,25 +28,14 @@ public class BlindSignaturePublicKeyService implements IBlindSignaturePublicKeyS
     private final BlindSignaturePrivateKeyRepositoryPort blindSignaturePrivateKeyRepository;
     private final RsaKeyMapper rsaKeyMapper;
     private final RsaBssaService rsaBssaService;
-
-    private void loadKeys(BlindSignaturePublicKeyModel model) {
-        byte[] privateKeyBytes = blindSignaturePrivateKeyRepository
-            .readPrivateKey(model.getId());
-
-        byte[] publicKeyBytes = Base64.getDecoder()
-            .decode(model.getPublicKey());
-        
-        PrivateKey privateKey = rsaKeyMapper.bytesToRsaPrivateKey(privateKeyBytes);
-        PublicKey publicKey = rsaKeyMapper.bytesToRsaPublicKey(publicKeyBytes);
-
-        rsaBssaService.loadKeys(publicKey, privateKey);
-    }
-
+    
     @Override 
-    public void loadActiveKeys() {
-        blindSignaturePublicKeyRepository
-            .findByStatus(KeyStatus.ACTIVE)
-            .ifPresent(this::loadKeys);
+    public void loadPrivateKeyByAuthorizationKeysId(UUID authorizationKeysId) {
+        byte[] privateKeyBytes = blindSignaturePrivateKeyRepository
+            .readPrivateKey(authorizationKeysId);
+
+        PrivateKey privateKey = rsaKeyMapper.bytesToRsaPrivateKey(privateKeyBytes);
+        rsaBssaService.loadKeys(authorizationKeysId, privateKey);
     }
     
     @Override
@@ -77,27 +67,28 @@ public class BlindSignaturePublicKeyService implements IBlindSignaturePublicKeyS
     }
 
     @Override
-    public BlindSignaturePublicKeyModel getByElectionId(UUID electionId) {
+    public BlindSignaturePublicKeyModel getActivePublicKeyByElectionId(UUID electionId) {
         return blindSignaturePublicKeyRepository.findByElectionIdAndStatus(electionId, KeyStatus.ACTIVE)
             .orElseThrow(() -> new PublicKeyNotActiveForElectionException(electionId));
     }
 
     @Override
-    public BlindSignaturePublicKeyModel activateKeys(UUID electionId) {
+    public BlindSignaturePublicKeyModel activateElectionKeys(UUID electionId) {
         BlindSignaturePublicKeyModel model = 
             blindSignaturePublicKeyRepository.findByElectionId(electionId)
                 .orElseThrow(() -> new PublicKeyNotFoundException("Public key hasn't found with Election ID " + electionId));
-        
-    
-        if(model.getStatus() == KeyStatus.ACTIVE) {
-            if(!rsaBssaService.hasKeysLoaded())
-                loadKeys(model);
-
-            return model;
-        }
-        
-        loadKeys(model);
+            
         model.activate();
+        return blindSignaturePublicKeyRepository.save(model);
+    }
+
+    @Override 
+    public BlindSignaturePublicKeyModel expireActiveElectionKeys(UUID electionId) {
+        BlindSignaturePublicKeyModel model = 
+            blindSignaturePublicKeyRepository.findByElectionIdAndStatus(electionId, KeyStatus.ACTIVE)
+                .orElseThrow(() -> new PublicKeyNotActiveForElectionException(electionId));
+
+        model.expire();
         return blindSignaturePublicKeyRepository.save(model);
     }
 }

@@ -13,7 +13,7 @@ public class BlindSignatureMapper {
             .id(model.getId())
             .electionId(model.getElectionId())
             .userId(model.getUserId())
-            .authorizationKeysId(entity)
+            .authorizationKeys(entity)
             .blindSignature(model.getBlindSignature())
             .createdAt(model.getCreatedAt())
             .build();
@@ -24,7 +24,7 @@ public class BlindSignatureMapper {
             .id(entity.getId())
             .electionId(entity.getElectionId())
             .userId(entity.getUserId())
-            .authorizationKeysId(entity.getAuthorizationKeysId().getId())
+            .authorizationKeysId(entity.getAuthorizationKeys().getId())
             .blindSignature(entity.getBlindSignature())
             .createdAt(entity.getCreatedAt())
             .build();

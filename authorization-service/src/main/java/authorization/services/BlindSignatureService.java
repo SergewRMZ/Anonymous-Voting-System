@@ -1,11 +1,10 @@
 package authorization.services;
 
 import authorization.domain.model.BlindSignaturePublicKeyModel;
-import authorization.domain.model.KeyStatus;
 import authorization.dto.BlindSignatureRequest;
-import authorization.repository.interfaces.BlindSignaturePublicKeyRepositoryPort;
 import authorization.repository.interfaces.BlindSignatureRepositoryPort;
 import authorization.services.cripto.RsaBssaService;
+import authorization.services.interfaces.IBlindSignaturePublicKeyService;
 import authorization.services.interfaces.IBlindSignatureService;
 import authorization.domain.model.BlindSignatureModel;
 
@@ -16,18 +15,20 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import authorization.domain.exception.BlindSignatureAlreadyExistsException;
-import authorization.domain.exception.PublicKeyNotActiveForElectionException;
-import authorization.domain.exception.SigningKeysNotLoadedException;
 
 @Service 
 @RequiredArgsConstructor 
 public class BlindSignatureService implements IBlindSignatureService {
     private final BlindSignatureRepositoryPort blindSignatureRepositoryPort;
-    private final BlindSignaturePublicKeyRepositoryPort blindSignaturePublicKeyRepositoryPort;
+    private final IBlindSignaturePublicKeyService blindSignaturePublicKeyService;
     private final RsaBssaService rsaBssaService;
+
 
     @Override
     public BlindSignatureModel generateBlindSignature(UUID electionId, UUID userId, BlindSignatureRequest request) {
+        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService
+            .getActivePublicKeyByElectionId(electionId);
+        
         if(this.blindSignatureRepositoryPort.existsByUserIdAndElectionId(userId, electionId)) {
             throw new BlindSignatureAlreadyExistsException(
                 userId, 
@@ -35,21 +36,20 @@ public class BlindSignatureService implements IBlindSignatureService {
             ); 
         } 
 
-        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyRepositoryPort
-            .findByElectionIdAndStatus(electionId, KeyStatus.ACTIVE)
-            .orElseThrow(() -> new PublicKeyNotActiveForElectionException(electionId));
-
-        if(!rsaBssaService.hasKeysLoaded()) {
-            throw new SigningKeysNotLoadedException(electionId);
+        if(!rsaBssaService.hasKeysLoaded(publicKeyModel.getId())) {
+            blindSignaturePublicKeyService
+                .loadPrivateKeyByAuthorizationKeysId(publicKeyModel.getId());
         }
 
-        byte[] blindedMessageBytes = Base64.getDecoder()
+        byte[] blindedMessageBytes = Base64
+            .getDecoder()
             .decode(request.blindedMessage());
 
-        byte[] blindSignature = 
-            rsaBssaService.sign(blindedMessageBytes);
-            
-        String blindSignatureB64 = Base64.getEncoder()
+        byte[] blindSignature = rsaBssaService
+            .sign(publicKeyModel.getId(), blindedMessageBytes);
+       
+        String blindSignatureB64 = Base64
+            .getEncoder()
             .encodeToString(blindSignature);
         
         BlindSignatureModel model = BlindSignatureModel.builder()
@@ -59,7 +59,7 @@ public class BlindSignatureService implements IBlindSignatureService {
             .blindSignature(blindSignatureB64)
             .createdAt(Instant.now())
             .build();
-        return model;
-        // return blindSignatureRepositoryPort.save(model);
+        // return model;
+        return blindSignatureRepositoryPort.save(model);
     }
 }

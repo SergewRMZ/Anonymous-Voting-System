@@ -30,12 +30,6 @@ public class BlindSignaturePublicKeyRepositoryAdapter implements BlindSignatureP
             .map(blindSignaturePublicKeyMapper::toModel);
     }
 
-    @Override 
-    public Optional<BlindSignaturePublicKeyModel> findByStatus(KeyStatus status) {
-        return jpaBlindSignaturePublicKeyRepository.findByStatus(status)
-            .map(blindSignaturePublicKeyMapper::toModel);
-    }
-
     @Override
     public Optional<BlindSignaturePublicKeyModel> findByElectionId(UUID electionId) {
         return jpaBlindSignaturePublicKeyRepository.findByElectionId(electionId)

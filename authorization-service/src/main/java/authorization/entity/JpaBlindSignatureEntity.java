@@ -44,7 +44,7 @@ public class JpaBlindSignatureEntity {
 
     @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "authorization_keys_id", nullable = false)
-    private JpaBlindSignaturePublicKeyEntity authorizationKeysId;
+    private JpaBlindSignaturePublicKeyEntity authorizationKeys;
 
     @Column (nullable = false, columnDefinition = "TEXT")
     private String blindSignature;

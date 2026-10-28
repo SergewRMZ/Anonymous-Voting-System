@@ -48,18 +48,6 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
-    @ExceptionHandler (SigningKeysNotLoadedException.class)
-    public ProblemDetail handleSigningKeysNotLoaded(SigningKeysNotLoadedException ex) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-            HttpStatus.NOT_FOUND, 
-            ex.getMessage()
-        );
-
-        problemDetail.setTitle("Authorization keys hasn't loaded");
-        problemDetail.setProperty("timestamp", Instant.now());
-        return problemDetail;
-    }
-
     @ExceptionHandler (BlindSignatureAlreadyExistsException.class)
     public ProblemDetail handleBlindSignatureAlreadyExistsException(BlindSignatureAlreadyExistsException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
