@@ -28,6 +28,11 @@ public class SecurityConfig {
                 ).permitAll()
 
                 .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/tally-service/elections/*/results"
+                ).authenticated()
+
+                .requestMatchers(
                     HttpMethod.POST, 
                     "/api/tally-service/elections/*/encryption-keys"
                 ).hasRole(UserRoles.AUTHORITY.name())
@@ -39,7 +44,7 @@ public class SecurityConfig {
 
                 .requestMatchers(
                     HttpMethod.POST,
-                    "/api/tally-service/elections/*/tally"
+                    "/api/tally-service/elections/*/tallies"
                 ).hasRole(UserRoles.AUTHORITY.name())
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(

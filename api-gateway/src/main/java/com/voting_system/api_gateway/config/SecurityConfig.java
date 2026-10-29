@@ -35,13 +35,18 @@ public class SecurityConfig {
                 ).permitAll()
 
                 .pathMatchers(
+                    HttpMethod.GET,
+                    "/api/tally-service/elections/*/results"
+                ).authenticated()
+
+                .pathMatchers(
                     HttpMethod.POST, 
                     "/api/tally-service/elections/*/encryption-keys"
                 ).hasRole(UserRole.AUTHORITY.name())
 
                 .pathMatchers(
                     HttpMethod.POST,
-                    "/api/tally-service/elections/*/tally"
+                    "/api/tally-service/elections/*/tallies"
                 ).hasRole(UserRole.AUTHORITY.name())
 
                 .pathMatchers(

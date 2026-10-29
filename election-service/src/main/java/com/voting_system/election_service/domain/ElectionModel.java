@@ -79,4 +79,18 @@ public class ElectionModel {
 
         this.status = ElectionStatus.CLOSED;
     }
+
+    public void finishElection(Instant now) {
+        if(this.status != ElectionStatus.CLOSED) {
+            throw new InvalidElectionStateException("Only CLOSED elections can be finished");
+        }
+
+        if(now.isBefore(this.endDate)) {
+            throw new InvalidElectionDateException(
+            "Cannot finish election before its end date"
+            );
+        }
+
+        this.status = ElectionStatus.FINISHED;
+    }
 }

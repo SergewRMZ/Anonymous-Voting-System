@@ -32,6 +32,11 @@ public class SecurityConfig {
                     "/api/election-service/elections/*/structure"
                 ).permitAll()
 
+                .requestMatchers(
+                    HttpMethod.PATCH, 
+                    "/api/election-service/elections/*/finish"
+                ).permitAll()
+
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(

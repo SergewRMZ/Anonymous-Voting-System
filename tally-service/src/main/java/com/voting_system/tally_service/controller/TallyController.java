@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -26,13 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class TallyController {
     private final TallyService tallyService;
 
-    @PostMapping("/tally")
+    @PostMapping("/tallies")
     public ResponseEntity<List<ElectionResultModel>> voteTallying(@PathVariable UUID electionId) {
         return ResponseEntity.ok(tallyService.voteTallying(electionId));
     }
 
     @GetMapping("/results")
     public ResponseEntity<List<ElectionResultModel>> getResults(@PathVariable UUID electionId) {
-        return null;
+        return ResponseEntity.ok(tallyService.getResults(electionId));
     }
 }

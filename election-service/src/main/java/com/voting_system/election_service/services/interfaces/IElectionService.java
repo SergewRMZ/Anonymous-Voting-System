@@ -14,6 +14,7 @@ public interface IElectionService {
     public ElectionModel publishElection(UUID electionId);
     public ElectionModel validateElection(UUID electionId);
     public ElectionModel activateElection(UUID electionId);
+    public ElectionModel finishElection(UUID electionId);
     public List<ElectionModel> getElections(List<String> roles);
     public ElectionDetailsDtoResponse getElectionDetails(UUID electionId, List<String> roles);
     public GetElectionStatusDto getElectionStatus(UUID electionId);

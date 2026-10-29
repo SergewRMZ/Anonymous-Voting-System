@@ -82,6 +82,13 @@ public class ElectionService implements IElectionService {
     }
 
     @Override 
+    public ElectionModel finishElection(UUID electionId) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        electionModel.finishElection(Instant.now());
+        return electionRepository.save(electionModel);
+    }
+
+    @Override 
     @Transactional 
     public void closeExpiredElections() {
         Instant now = Instant.now();

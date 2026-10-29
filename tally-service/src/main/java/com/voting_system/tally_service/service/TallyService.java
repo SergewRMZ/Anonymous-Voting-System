@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.voting_system.tally_service.client.BulletinBoardServiceClient;
 import com.voting_system.tally_service.client.ElectionServiceClient;
+import com.voting_system.tally_service.client.dto.ElectionDtoResponse;
 import com.voting_system.tally_service.client.dto.ElectionStatus;
 import com.voting_system.tally_service.client.dto.GetElectionStatusDto;
 import com.voting_system.tally_service.client.dto.GetElectionStructureDto;
@@ -71,7 +72,9 @@ public class TallyService {
         );
 
         List<ElectionResultModel> results = processEncryptedResults(electionId, encryptedResults);
-        return electionResultRepositoryPort.saveAll(results);
+        results = electionResultRepositoryPort.saveAll(results);
+        electionServiceClient.finishElection(electionId);
+        return results;
     }
 
     private List<ElectionResultModel> processEncryptedResults(UUID electionId, List<EncryptedResult> encryptedResults) {
@@ -89,7 +92,7 @@ public class TallyService {
                 );
 
                 return ElectionResultModel.builder()
-                    .electionId(result.electionPositionId())
+                    .electionId(result.electionId())
                     .electionPositionId(result.electionPositionId())
                     .candidacyId(result.candidacyId())
                     .result(votes)
