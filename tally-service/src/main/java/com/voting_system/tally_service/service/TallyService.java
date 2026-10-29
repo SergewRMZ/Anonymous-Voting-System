@@ -18,8 +18,11 @@ import com.voting_system.tally_service.crypto.CryptoUtils;
 import com.voting_system.tally_service.crypto.ElGamalAcumulator;
 import com.voting_system.tally_service.crypto.ElGamalDecryptor;
 import com.voting_system.tally_service.crypto.EncryptedResult;
+import com.voting_system.tally_service.exception.ElectionAlreadyTalliedException;
 import com.voting_system.tally_service.exception.ElectionNotClosedException;
-import com.voting_system.tally_service.model.TallyModel;
+import com.voting_system.tally_service.exception.ElectionNotFinishedException;
+import com.voting_system.tally_service.model.ElectionResultModel;
+import com.voting_system.tally_service.repository.ElectionResultRepositoryPort;
 import com.voting_system.tally_service.repository.PrivateEncryptionKeyRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -32,13 +35,27 @@ public class TallyService {
     private final ElGamalAcumulator elGamalAcumulator;
     private final ElGamalDecryptor elGamalDecryptor;
     private final PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
+    private final ElectionResultRepositoryPort electionResultRepositoryPort;
 
-    public List<TallyModel> tallyVotes(UUID electionId) {
+    public List<ElectionResultModel> getResults(UUID electionId) {
+        GetElectionStatusDto getElectionStatusDto = electionServiceClient.getElectionStatus(electionId);
+        if(getElectionStatusDto.status() != ElectionStatus.FINISHED) {
+            throw new ElectionNotFinishedException(electionId);
+        }
+
+        return electionResultRepositoryPort.findAllByElectionId(electionId);
+    }
+
+    public List<ElectionResultModel> voteTallying(UUID electionId) {
         GetElectionStatusDto getElectionStatusResponse = electionServiceClient.getElectionStatus(electionId);
+        if(getElectionStatusResponse.status() == ElectionStatus.FINISHED) {
+            throw new ElectionAlreadyTalliedException(electionId);
+        }
+        
         if(getElectionStatusResponse.status() != ElectionStatus.CLOSED) {
             throw new ElectionNotClosedException(electionId);
         }
-
+        
         GetElectionStructureDto response = electionServiceClient.getElectionStructureDto(electionId);
         List<EncryptedResult> encryptedResults = new ArrayList<>();
         
@@ -53,11 +70,11 @@ public class TallyService {
             )
         );
 
-        List<TallyModel> results = processEncryptedResults(electionId, encryptedResults);
-        return results;
+        List<ElectionResultModel> results = processEncryptedResults(electionId, encryptedResults);
+        return electionResultRepositoryPort.saveAll(results);
     }
 
-    private List<TallyModel> processEncryptedResults(UUID electionId, List<EncryptedResult> encryptedResults) {
+    private List<ElectionResultModel> processEncryptedResults(UUID electionId, List<EncryptedResult> encryptedResults) {
         BigInteger privateKeyScalar = new BigInteger(1, 
             privateEncryptionKeyRepository.readPrivateKey(electionId)
         );
@@ -71,10 +88,10 @@ public class TallyService {
                     result.ballotCount()
                 );
 
-                return TallyModel.builder()
+                return ElectionResultModel.builder()
+                    .electionId(result.electionPositionId())
                     .electionPositionId(result.electionPositionId())
                     .candidacyId(result.candidacyId())
-                    .totalVotes(result.ballotCount())
                     .result(votes)
                     .createdAt(Instant.now())
                     .build();
@@ -83,7 +100,7 @@ public class TallyService {
     }
 
     private EncryptedResult processBallots(UUID electionId, UUID electionPositionId, UUID candidacyId) {
-        elGamalAcumulator.resetAccumulator();
+        this.elGamalAcumulator.resetAccumulator();
         int page = 0;
         int size = 100;
         int ballotCount = 0;

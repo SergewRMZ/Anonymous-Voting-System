@@ -1,8 +1,6 @@
 package authorization.services;
-import authorization.repository.jpa.JpaBlindSignaturePublicKeyRepository;
 import java.security.KeyPair;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
@@ -28,7 +26,7 @@ public class BlindSignaturePublicKeyService implements IBlindSignaturePublicKeyS
     private final BlindSignaturePrivateKeyRepositoryPort blindSignaturePrivateKeyRepository;
     private final RsaKeyMapper rsaKeyMapper;
     private final RsaBssaService rsaBssaService;
-    
+
     @Override 
     public void loadPrivateKeyByAuthorizationKeysId(UUID authorizationKeysId) {
         byte[] privateKeyBytes = blindSignaturePrivateKeyRepository

@@ -70,4 +70,24 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler (ElectionResultsNotFoundException.class)
+    public ProblemDetail handleElectionResultsNotFoundException(ElectionResultsNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.NOT_FOUND, ex.getMessage());
+
+        problemDetail.setTitle("ELECTION_RESULTS_NOT_FOUND");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (ElectionNotFinishedException.class)
+    public ProblemDetail handleElectionNotFinishedException(ElectionNotFinishedException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("ELECTION_RESULTS_NOT_PERFORMED");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }

@@ -10,6 +10,6 @@ import java.util.UUID;
  */
 public class ElectionNotClosedException extends RuntimeException {
     public ElectionNotClosedException(UUID electionId) {
-        super("Election " + electionId + " hasn't closed, cannot tally votes");
+        super("La elección " + electionId + " aún no ha finalizado");
     }
 }

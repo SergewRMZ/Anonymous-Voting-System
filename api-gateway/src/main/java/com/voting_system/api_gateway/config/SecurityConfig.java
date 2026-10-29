@@ -49,7 +49,7 @@ public class SecurityConfig {
                     "/api/tally-service/elections/*/encryption-keys/activate"
                 ).hasRole(UserRole.AUTHORITY.name())
 
-                // Public endpoints
+                // Public endpoints para el registro de votantes
                 .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
 
                 // bulletin-board
@@ -69,10 +69,18 @@ public class SecurityConfig {
                 // election-service
                 .pathMatchers(HttpMethod.POST, "/api/election-service/elections").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/publish").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/validate").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/activate").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.GET, "/api/election-service/elections").hasAnyRole(UserRole.VOTER.name(), UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.GET, "/api/election-service/elections/{electionId}").hasAnyRole(UserRole.VOTER.name(), UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
 
+                .pathMatchers(HttpMethod.POST, "/api/election-service/positions").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.POST, "/api/election-service/elections/*/positions/*").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.GET, "/api/election-service/positions").hasRole(UserRole.ADMIN.name())
+                
+                .pathMatchers(HttpMethod.POST, "/api/election-service/candidates").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.POST, "/api/election-service/election-positions/*/candidacies").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.GET, "/api/election-service/candidates").hasRole(UserRole.ADMIN.name())
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {

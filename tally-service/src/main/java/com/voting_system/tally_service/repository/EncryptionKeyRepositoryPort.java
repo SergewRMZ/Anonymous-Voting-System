@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import com.voting_system.tally_service.model.EncryptionKeyModel;
 
-public interface IEncryptionKeyRepository {
+public interface EncryptionKeyRepositoryPort {
     Optional<EncryptionKeyModel> findByElectionId(UUID electionId);
     boolean existsByElectionId(UUID electionId);
     EncryptionKeyModel save(EncryptionKeyModel model);

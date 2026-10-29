@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository 
 @RequiredArgsConstructor 
-public class EncryptionKeyRepositoryAdapter implements IEncryptionKeyRepository {
+public class EncryptionKeyRepositoryAdapter implements EncryptionKeyRepositoryPort {
     private final EncryptionKeyMapper encryptionKeyMapper;
     private final JpaEncryptionRepository jpaEncryptionRepository;
     @Override

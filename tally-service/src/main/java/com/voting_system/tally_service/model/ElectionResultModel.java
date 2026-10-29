@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor 
 @NoArgsConstructor 
 @Builder 
-public class TallyModel {
+public class ElectionResultModel {
     private UUID id;
+    private UUID electionId;
     private UUID electionPositionId;
     private UUID candidacyId;
-    private int totalVotes;
     private int result;
     private Instant createdAt;
 }
