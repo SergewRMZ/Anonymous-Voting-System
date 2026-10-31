@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.voting_system.tally_service.client.BulletinBoardServiceClient;
 import com.voting_system.tally_service.client.ElectionServiceClient;
-import com.voting_system.tally_service.client.dto.ElectionDtoResponse;
 import com.voting_system.tally_service.client.dto.ElectionStatus;
 import com.voting_system.tally_service.client.dto.GetElectionStatusDto;
 import com.voting_system.tally_service.client.dto.GetElectionStructureDto;
