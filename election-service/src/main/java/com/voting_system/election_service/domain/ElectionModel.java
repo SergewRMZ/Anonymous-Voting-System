@@ -32,6 +32,21 @@ public class ElectionModel {
         this.status = ElectionStatus.DRAFT;
     }
 
+    public void updateConfiguration(String name, String description, Instant startDate, Instant endDate) {
+        if(this.status != ElectionStatus.DRAFT) {
+            throw new InvalidElectionStateException("Only elections with DRAFT status can be modified");
+        }
+
+        if(!startDate.isBefore(endDate)) {
+            throw new InvalidElectionDateException("Start date must be before end date");
+        }
+
+        this.name = name;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
     public void publishElection() {
         if(this.status != ElectionStatus.DRAFT) {
             throw new InvalidElectionStateException("Only elections with DRAFT status can be published");

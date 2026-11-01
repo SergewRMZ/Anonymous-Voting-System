@@ -9,6 +9,7 @@ import com.voting_system.election_service.domain.ElectionModel;
 import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.ElectionDtoResponse;
+import com.voting_system.election_service.dto.UpdateElectionDtoRequest;
 import com.voting_system.election_service.services.interfaces.IElectionService;
 
 import java.util.List;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import jakarta.validation.Valid;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 
@@ -39,6 +42,15 @@ public class ElectionController {
             ElectionDtoResponse.from(electionModel)
         );
     }   
+
+    @PutMapping("/{electionId}")
+    public ResponseEntity<ElectionDtoResponse> updateElection(
+        @PathVariable UUID electionId,
+        @Valid @RequestBody UpdateElectionDtoRequest updateElectionDtoRequest
+    ) {
+        ElectionModel electionModel = electionService.updateElection(electionId, updateElectionDtoRequest);
+        return ResponseEntity.ok(ElectionDtoResponse.from(electionModel));
+    }
 
     @PatchMapping ("/{electionId}/publish")
     public ResponseEntity<ElectionDtoResponse> publicElections(@PathVariable UUID electionId) {

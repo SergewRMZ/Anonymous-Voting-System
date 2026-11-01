@@ -22,6 +22,7 @@ import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.ElectionPositionDetailsDtoResponse;
 import com.voting_system.election_service.dto.GetElectionStatusDto;
 import com.voting_system.election_service.dto.GetElectionStructureDto;
+import com.voting_system.election_service.dto.UpdateElectionDtoRequest;
 import com.voting_system.election_service.exceptions.CandidateNotFoundException;
 import com.voting_system.election_service.exceptions.ElectionNotAllowedException;
 import com.voting_system.election_service.exceptions.PositionNotFoundException;
@@ -53,6 +54,20 @@ public class ElectionService implements IElectionService {
 
         
         electionModel.createElection();
+        return electionRepository.save(electionModel);
+    }
+
+
+    @Override 
+    @Transactional 
+    public ElectionModel updateElection(UUID electionId, UpdateElectionDtoRequest updateElectionDtoRequest) {
+        ElectionModel electionModel = electionRepository.getElection(electionId);
+        electionModel.updateConfiguration(
+            updateElectionDtoRequest.name(),
+            updateElectionDtoRequest.description(),
+            updateElectionDtoRequest.startDate(),
+            updateElectionDtoRequest.endDate()
+        );
         return electionRepository.save(electionModel);
     }
 

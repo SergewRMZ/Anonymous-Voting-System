@@ -33,13 +33,6 @@ public class AuthController {
         );
     }
 
-    @PostMapping("/voter")
-    public ResponseEntity<UserRegisterResponseDTO> register(@Valid @RequestBody UserRegisterRequestDTO request) {
-        String userId = userService.registerUser(request, UserRole.ROLE_VOTER, false);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-            UserRegisterResponseDTO.from("User has been registered correctly", userId));
-    }
-
     @PatchMapping ("/voters/{userId}/status")
     public ResponseEntity<?> updateVoterStatus(@PathVariable String userId, @RequestParam boolean enabled) {
         userService.updateVoterStatus(userId, enabled);

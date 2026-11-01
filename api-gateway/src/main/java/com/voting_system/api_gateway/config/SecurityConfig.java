@@ -54,16 +54,14 @@ public class SecurityConfig {
                     "/api/tally-service/elections/*/encryption-keys/activate"
                 ).hasRole(UserRole.AUTHORITY.name())
 
-                // Public endpoints para el registro de votantes
-                .pathMatchers(HttpMethod.POST, "/api/auth/voter").permitAll()
-
                 // bulletin-board
                 .pathMatchers(HttpMethod.POST, "/api/bulletin-board/elections/*/votes").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/bulletin-board/elections/*/votes").permitAll()
                 
                 // authentication-service
                 .pathMatchers(HttpMethod.POST, "/api/auth/admin").hasRole(UserRole.AUTHORITY.name())
-                .pathMatchers(HttpMethod.PATCH, "/api/users/voter/*/status").hasRole(UserRole.ADMIN.name())
+                // Revisión de votantes registrados en Keycloak (listar, aprobar, habilitar/deshabilitar)
+                .pathMatchers("/api/auth/voters", "/api/auth/voters/**").hasRole(UserRole.ADMIN.name())
 
                 // authorization-service
                 .pathMatchers(HttpMethod.GET, "/api/authorization-service/elections/*/keys/public").permitAll()
@@ -73,6 +71,7 @@ public class SecurityConfig {
 
                 // election-service
                 .pathMatchers(HttpMethod.POST, "/api/election-service/elections").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.PUT, "/api/election-service/elections/*").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/publish").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/validate").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/activate").hasRole(UserRole.AUTHORITY.name())

@@ -21,6 +21,16 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(InvalidElectionDateException.class)
+    public ProblemDetail handleInvalidElectionDateException(InvalidElectionDateException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, ex.getMessage());
+
+        problemDetail.setTitle("Invalid Election Dates");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler (ElectionNotFoundException.class)
     public ProblemDetail handleElectionNotFoundException(ElectionNotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(

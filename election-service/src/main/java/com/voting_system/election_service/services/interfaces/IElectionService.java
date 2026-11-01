@@ -8,9 +8,11 @@ import com.voting_system.election_service.dto.CreateElectionDtoRequest;
 import com.voting_system.election_service.dto.ElectionDetailsDtoResponse;
 import com.voting_system.election_service.dto.GetElectionStatusDto;
 import com.voting_system.election_service.dto.GetElectionStructureDto;
+import com.voting_system.election_service.dto.UpdateElectionDtoRequest;
 
 public interface IElectionService {
     public ElectionModel createElection(CreateElectionDtoRequest createElectionDtoRequest);
+    public ElectionModel updateElection(UUID electionId, UpdateElectionDtoRequest updateElectionDtoRequest);
     public ElectionModel publishElection(UUID electionId);
     public ElectionModel validateElection(UUID electionId);
     public ElectionModel activateElection(UUID electionId);
