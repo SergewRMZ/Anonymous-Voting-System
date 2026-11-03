@@ -12,8 +12,8 @@ spring:
         registration:
           api-gateway-client:
             provider: keycloak
-            client-id: ${KEYCLOAK_CLIENT_ID}
-            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+            client-id: ${KEYCLOAK_API_GATEWAY_CLIENT_ID}
+            client-secret: ${KEYCLOAK_API_GATEWAY_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
             scope: openid
@@ -28,11 +28,18 @@ spring:
       default-filters:
         - TokenRelay
 
-      routes:
-        # Authorization Microservice Path
-        - id: authorization-service
-          uri: http://localhost:8080
-          predicates:
-            - Path=/api/authorization-service/**
 server:
   port: 9000
+
+# Las rutas se definen en GatewayConfig.java
+services:
+  authorization-service:
+    base-url: ${AUTHORIZATION_SERVICE_URL:http://localhost:8080}
+  authentication-service:
+    base-url: ${AUTHENTICATION_SERVICE_URL:http://localhost:8082}
+  election-service:
+    base-url: ${ELECTION_SERVICE_URL:http://localhost:8083}
+  tally-service:
+    base-url: ${TALLY_SERVICE_URL:http://localhost:8084}
+  bulletin-board:
+    base-url: ${BULLETIN_BOARD_SERVICE_URL:http://localhost:8085}

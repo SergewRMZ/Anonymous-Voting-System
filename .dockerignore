@@ -1,0 +1,14 @@
+# Datos y secretos: nunca deben entrar al contexto de construcción ni a una imagen.
+**/keys
+**/.env
+postgres
+
+# Artefactos y archivos locales
+**/target
+.git
+.vscode
+*.md
+**/.env.*
+
+# Realm exportado de Keycloak: contiene secretos.
+keycloak

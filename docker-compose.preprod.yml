@@ -1,0 +1,198 @@
+name: voting-system-preprod
+services:
+  voting-db:
+    image: postgres:14.24-alpine3.23
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - voting_db_data:/var/lib/postgresql/data
+      # Crea bulletin_board-db la primera vez que se inicializa el volumen
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - private
+
+  keycloak-db:
+    image: postgres:14.24-alpine3.23
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - private
+
+  # ---- Identidad ----
+  # Keycloak Service
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    # Modo desarrollo (rápido y sin HTTPS obligatorio). Si el realm ya existe, no se sobrescribe
+    command: start-dev --import-realm
+    restart: unless-stopped
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: ${KEYCLOAK_DB_URL}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_HTTP_PORT: ${KEYCLOAK_PORT}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      # El navegador necesita llegar a Keycloak para iniciar sesión
+      - "${KEYCLOAK_PORT}:${KEYCLOAK_PORT}"
+    networks:
+      # El navegador y los contenedores usan el mismo nombre: keycloak.localhost
+      public:
+        aliases:
+          - keycloak.localhost
+      private:
+        aliases:
+          - keycloak.localhost
+
+  # ---- Punto de entrada ----
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      # Quitar cuando el issuer use un dominio real.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:${KEYCLOAK_PORT}/realms/voting-system-realm/protocol/openid-connect/certs
+      KEYCLOAK_API_GATEWAY_CLIENT_ID: ${KEYCLOAK_API_GATEWAY_CLIENT_ID}
+      KEYCLOAK_API_GATEWAY_CLIENT_SECRET: ${KEYCLOAK_API_GATEWAY_CLIENT_SECRET}
+      AUTHORIZATION_SERVICE_URL: http://authorization-service:8080
+      AUTHENTICATION_SERVICE_URL: http://authentication-service:8082
+      ELECTION_SERVICE_URL: http://election-service:8083
+      TALLY_SERVICE_URL: http://tally-service:8084
+      BULLETIN_BOARD_SERVICE_URL: http://bulletin-board:8085
+    ports:
+      - "9000:9000"
+    depends_on:
+      - authorization-service
+      - authentication-service
+      - election-service
+      - tally-service
+      - bulletin-board
+    networks:
+      - public
+      - private
+
+  authorization-service:
+    build:
+      context: .
+      dockerfile: authorization-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      APP_KEYS_DIRECTORY: /data/keys
+    volumes:
+      - ./authorization-service/keys:/data/keys
+    depends_on:
+      voting-db:
+        condition: service_healthy
+    networks:
+      - private
+
+  authentication-service:
+    build:
+      context: .
+      dockerfile: authentication-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      KEYCLOAK_SERVER_URL: http://keycloak.localhost:${KEYCLOAK_PORT}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_AUTH_SERVICE_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_AUTH_SERVICE_CLIENT_SECRET}
+    networks:
+      - private
+
+  election-service:
+    build:
+      context: .
+      dockerfile: election-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+    depends_on:
+      voting-db:
+        condition: service_healthy
+    networks:
+      - private
+
+  tally-service:
+    build:
+      context: .
+      dockerfile: tally-service/Dockerfile
+    restart: unless-stopped
+    # Aporta KEYCLOAK_CLIENT_ID y KEYCLOAK_CLIENT_SECRET propios de este servicio
+    env_file:
+      - ./tally-service/.env
+    environment:
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
+      BULLETIN_BOARD_SERVICE_URL: http://bulletin-board:8085
+      ELECTION_SERVICE_BASE_URL: http://election-service:8083
+      APP_KEYS_DIRECTORY: /data/keys
+    volumes:
+      # Claves privadas de cifrado: solo este contenedor las monta
+      - ./tally-service/keys:/data/keys
+    depends_on:
+      voting-db:
+        condition: service_healthy
+    networks:
+      - private
+
+  bulletin-board:
+    build:
+      context: .
+      dockerfile: bulletin-board/Dockerfile
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      AUTHORIZATION_SERVICE_URL: http://authorization-service:8080
+    depends_on:
+      voting-db:
+        condition: service_healthy
+    networks:
+      - private
+
+volumes:
+  voting_db_data:
+  keycloak_db_data:
+
+networks:
+  public:
+
+  # Comunicación entre servicios, sin acceso a internet
+  private:
+    internal: true

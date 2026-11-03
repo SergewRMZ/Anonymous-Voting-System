@@ -23,7 +23,7 @@ public class BlindSignaturePrivateKeyRepositoryAdapter implements BlindSignature
      * Constructor for KeyStorageAdapter.
      * @param keysDir The directory where cryptographic keys will be stored.
      */
-    public BlindSignaturePrivateKeyRepositoryAdapter(@Value("${app.keys.directory:./keys}") String keysDir) {
+    public BlindSignaturePrivateKeyRepositoryAdapter(@Value("${app.keys.directory}") String keysDir) {
         this.keysDirectory = Paths.get(keysDir).toAbsolutePath().normalize();
     }
 
