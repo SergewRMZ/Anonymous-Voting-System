@@ -40,5 +40,9 @@ public class ElectionResultRepositoryAdapter implements ElectionResultRepository
             .map(electionResultMapper::toModel)
             .toList();
     }
-    
+
+    @Override
+    public boolean existsByElectionId(UUID electionId) {
+        return jpaElectionResultRepository.existsByElectionId(electionId);
+    }
 }

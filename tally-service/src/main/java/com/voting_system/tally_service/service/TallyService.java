@@ -55,6 +55,14 @@ public class TallyService {
         if(getElectionStatusResponse.status() != ElectionStatus.CLOSED) {
             throw new ElectionNotClosedException(electionId);
         }
+
+        // Un intento anterior guardó los resultados, pero no pudo finalizar la elección:
+        // se reutilizan en lugar de repetir el conteo.
+        if(electionResultRepositoryPort.existsByElectionId(electionId)) {
+            List<ElectionResultModel> savedResults = electionResultRepositoryPort.findAllByElectionId(electionId);
+            electionServiceClient.finishElection(electionId);
+            return savedResults;
+        }
         
         GetElectionStructureDto response = electionServiceClient.getElectionStructureDto(electionId);
         List<EncryptedResult> encryptedResults = new ArrayList<>();

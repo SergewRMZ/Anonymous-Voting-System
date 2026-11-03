@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.voting_system.bulletin_board.client.AuthorizationPublicKey;
 import com.voting_system.bulletin_board.client.AuthorizationServiceClient;
+import com.voting_system.bulletin_board.client.ElectionServiceClient;
+import com.voting_system.bulletin_board.client.ElectionStatus;
 import com.voting_system.bulletin_board.crypto.AuthorizationPublicKeyCache;
 import com.voting_system.bulletin_board.crypto.CryptoUtils;
 import com.voting_system.bulletin_board.crypto.RsaBssaVerifier;
@@ -18,6 +20,7 @@ import com.voting_system.bulletin_board.dto.CreateVoteRequestDto;
 import com.voting_system.bulletin_board.dto.CreateVoteResponseDto;
 import com.voting_system.bulletin_board.dto.VoteRecordResponseDto;
 import com.voting_system.bulletin_board.exceptions.DuplicateVoteException;
+import com.voting_system.bulletin_board.exceptions.ElectionNotActiveException;
 import com.voting_system.bulletin_board.exceptions.VoteVerificationException;
 import com.voting_system.bulletin_board.model.VoteModel;
 import com.voting_system.bulletin_board.repository.VoteBallotProjection;
@@ -33,6 +36,7 @@ import tools.jackson.databind.ObjectMapper;
 public class VoteServiceAdapter implements IVoteService {
     private final VoteRepositoryPort voteRepositoryPort;
     private final AuthorizationServiceClient authorizationServiceClient;
+    private final ElectionServiceClient electionServiceClient;
     private final AuthorizationPublicKeyCache authorizationPublicKeyCache;
     private final RsaBssaVerifier rsaBssaVerifier;
 
@@ -40,6 +44,11 @@ public class VoteServiceAdapter implements IVoteService {
     public CreateVoteResponseDto submitVote(UUID electionId, CreateVoteRequestDto voteRequest) {
         if(voteRepositoryPort.existsByElectionIdAndSignature(electionId, voteRequest.signature())) {
             throw new DuplicateVoteException();
+        }
+
+        // Solo se reciben votos mientras la elección está activa.
+        if(electionServiceClient.getElectionStatus(electionId).status() != ElectionStatus.ACTIVE) {
+            throw new ElectionNotActiveException();
         }
         
         VoteModel voteModel = voteRequest.toModel(electionId);

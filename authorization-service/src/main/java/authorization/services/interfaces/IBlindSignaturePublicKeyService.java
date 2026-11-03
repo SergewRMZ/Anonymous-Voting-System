@@ -8,6 +8,7 @@ public interface IBlindSignaturePublicKeyService {
     public void loadPrivateKeyByAuthorizationKeysId(UUID authorizationKeysId);
     public BlindSignaturePublicKeyModel generateKeys(UUID electionId);
     public BlindSignaturePublicKeyModel getActivePublicKeyByElectionId(UUID electionId);
+    public BlindSignaturePublicKeyModel getPublicKeyByElectionId(UUID electionId);
     public BlindSignaturePublicKeyModel activateElectionKeys(UUID electionId);
     public BlindSignaturePublicKeyModel expireActiveElectionKeys(UUID electionId);
 }

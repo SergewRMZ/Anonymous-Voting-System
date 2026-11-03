@@ -71,6 +71,12 @@ public class BlindSignaturePublicKeyService implements IBlindSignaturePublicKeyS
     }
 
     @Override
+    public BlindSignaturePublicKeyModel getPublicKeyByElectionId(UUID electionId) {
+        return blindSignaturePublicKeyRepository.findByElectionId(electionId)
+            .orElseThrow(() -> new PublicKeyNotFoundException("Public key hasn't found with Election ID " + electionId));
+    }
+
+    @Override
     public BlindSignaturePublicKeyModel activateElectionKeys(UUID electionId) {
         BlindSignaturePublicKeyModel model = 
             blindSignaturePublicKeyRepository.findByElectionId(electionId)

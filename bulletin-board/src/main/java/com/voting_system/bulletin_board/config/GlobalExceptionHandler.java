@@ -61,6 +61,18 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty("timestamp", Instant.now());
         return problemDetail;
     }
+
+    @ExceptionHandler (ElectionNotActiveException.class)
+    public ProblemDetail handleElectionNotActiveException(ElectionNotActiveException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, 
+            ex.getMessage()
+        );
+
+        problemDetail.setTitle("Election Not Active");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
 }
 
 

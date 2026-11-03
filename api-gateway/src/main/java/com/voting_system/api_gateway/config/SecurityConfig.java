@@ -65,6 +65,7 @@ public class SecurityConfig {
 
                 // authorization-service
                 .pathMatchers(HttpMethod.GET, "/api/authorization-service/elections/*/keys/public").permitAll()
+                .pathMatchers(HttpMethod.GET, "/api/authorization-service/elections/*/keys").hasAnyRole(UserRole.ADMIN.name(), UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/keys").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/authorization-service/elections/*/keys/activate").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/blind-signature").hasRole(UserRole.VOTER.name())

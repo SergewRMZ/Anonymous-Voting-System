@@ -51,6 +51,17 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler (ElectionAlreadyTalliedException.class)
+    public ProblemDetail handleElectionAlreadyTalliedException(ElectionAlreadyTalliedException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Election Already Tallied");
+        problemDetail.setProperty("code", "ELECTION_ALREADY_TALLIED");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler (InvalidEllipticCurvePointsException.class)
     public ProblemDetail handleInvalidEllipticCurvePointsException(InvalidEllipticCurvePointsException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(

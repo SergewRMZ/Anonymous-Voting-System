@@ -8,4 +8,5 @@ import com.voting_system.tally_service.model.ElectionResultModel;
 public interface ElectionResultRepositoryPort {
     List<ElectionResultModel> saveAll(List<ElectionResultModel> resultList);
     List<ElectionResultModel> findAllByElectionId(UUID electionId);
+    boolean existsByElectionId(UUID electionId);
 }

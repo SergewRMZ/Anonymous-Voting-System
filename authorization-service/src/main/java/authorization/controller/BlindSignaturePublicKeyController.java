@@ -36,7 +36,14 @@ public class BlindSignaturePublicKeyController {
             .status(HttpStatus.CREATED).body(response);
     }
 
-    
+    // Consulta de gestión: devuelve la llave en cualquier estado; "/public" solo responde con la llave ACTIVE.
+    @GetMapping("")
+    public ResponseEntity<BlindSignaturePublicKeyResponse> getKeysByElectionId(@Valid @PathVariable UUID electionId) {
+        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getPublicKeyByElectionId(electionId);
+        BlindSignaturePublicKeyResponse response = mapper.toResponse(publicKeyModel);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/public")
     public ResponseEntity<BlindSignaturePublicKeyResponse> getPublicKeyByElectionId(@Valid @PathVariable UUID electionId) {
         BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getActivePublicKeyByElectionId(electionId);

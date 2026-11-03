@@ -9,4 +9,5 @@ import com.voting_system.tally_service.entity.JpaElectionResultEntity;
 
 public interface JpaElectionResultRepository extends JpaRepository<JpaElectionResultEntity, UUID> {
     Optional<List<JpaElectionResultEntity>> findAllByElectionId(UUID electionId);
+    boolean existsByElectionId(UUID electionId);
 }
