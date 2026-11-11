@@ -10,4 +10,6 @@ public interface ICandidacyRepository {
     public List<CandidacyModel> saveAll(UUID electionPositionId, List<UUID> candidateIds);
     public List<CandidacyModel> getCandidacies();
     public List<CandidacyModel> getCandidaciesByElectionPositionIds(List<UUID> electionPositionIds);
+    // true si el candidato ya compite en una elección que salió de DRAFT.
+    public boolean isCandidateInNonDraftElection(UUID candidateId);
 }

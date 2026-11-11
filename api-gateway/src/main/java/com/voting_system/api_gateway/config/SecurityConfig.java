@@ -69,6 +69,8 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/keys").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/authorization-service/elections/*/keys/activate").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/authorization-service/elections/*/blind-signature").hasRole(UserRole.VOTER.name())
+                // Si el votante del token ya obtuvo su firma ciega en la elección (ya votó).
+                .pathMatchers(HttpMethod.GET, "/api/authorization-service/elections/*/blind-signature/me").hasRole(UserRole.VOTER.name())
 
                 // election-service
                 .pathMatchers(HttpMethod.POST, "/api/election-service/elections").hasRole(UserRole.ADMIN.name())
@@ -86,6 +88,9 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.POST, "/api/election-service/candidates").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.POST, "/api/election-service/election-positions/*/candidacies").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.GET, "/api/election-service/candidates").hasRole(UserRole.ADMIN.name())
+                .pathMatchers(HttpMethod.PUT, "/api/election-service/candidates/*/photo").hasRole(UserRole.ADMIN.name())
+                // Pública: la carga un <img>, que no envía el token.
+                .pathMatchers(HttpMethod.GET, "/api/election-service/candidates/*/photo").permitAll()
                 .anyExchange().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtSpec -> {

@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 import com.voting_system.election_service.domain.CandidacyModel;
+import com.voting_system.election_service.domain.ElectionStatus;
 import com.voting_system.election_service.entity.JpaCandidacyEntity;
 import com.voting_system.election_service.entity.JpaCandidateEntity;
 import com.voting_system.election_service.entity.JpaElectionPositionEntity;
@@ -84,5 +85,11 @@ public class CandidacyRepositoryAdapter implements ICandidacyRepository {
             .stream()
             .map(candidacyMapper::toModel)
             .toList();
+    }
+
+    @Override
+    public boolean isCandidateInNonDraftElection(UUID candidateId) {
+        return jpaCandidacyRepository
+            .existsByCandidateEntity_IdAndElectionPositionEntity_Election_StatusNot(candidateId, ElectionStatus.DRAFT);
     }
 }

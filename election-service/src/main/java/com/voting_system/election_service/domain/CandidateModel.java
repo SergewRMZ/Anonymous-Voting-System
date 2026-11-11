@@ -19,6 +19,7 @@ public class CandidateModel {
     private String lastName;
     private String description;
     private boolean isActive;
+    private boolean hasPhoto;
     private Instant createdAt;
     private Instant updatedAt;
 }

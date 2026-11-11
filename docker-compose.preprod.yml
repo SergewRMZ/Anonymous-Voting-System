@@ -19,6 +19,8 @@ services:
       timeout: 5s
       retries: 10
     networks:
+      # Sin una red no interna, Docker no publica el puerto hacia el host
+      - public
       - private
 
   keycloak-db:

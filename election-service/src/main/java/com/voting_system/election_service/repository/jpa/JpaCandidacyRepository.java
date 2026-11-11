@@ -7,9 +7,12 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.voting_system.election_service.domain.ElectionStatus;
 import com.voting_system.election_service.entity.JpaCandidacyEntity;
 
 public interface JpaCandidacyRepository extends JpaRepository<JpaCandidacyEntity, UUID> {
     @EntityGraph(attributePaths = "candidateEntity")
     List<JpaCandidacyEntity> findAllByElectionPositionEntity_IdIn(Collection<UUID> electionPositionIds);
+
+    boolean existsByCandidateEntity_IdAndElectionPositionEntity_Election_StatusNot(UUID candidateId, ElectionStatus status);
 }

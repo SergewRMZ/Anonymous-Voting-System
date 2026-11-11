@@ -25,6 +25,11 @@ public class BlindSignatureService implements IBlindSignatureService {
 
 
     @Override
+    public boolean hasRequestedAuthorization(UUID electionId, UUID userId) {
+        return blindSignatureRepositoryPort.existsByUserIdAndElectionId(userId, electionId);
+    }
+
+    @Override
     public BlindSignatureModel generateBlindSignature(UUID electionId, UUID userId, BlindSignatureRequest request) {
         BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService
             .getActivePublicKeyByElectionId(electionId);

@@ -9,4 +9,5 @@ public interface ICandidateRepository {
     public CandidateModel save(CandidateModel model);
     public List<CandidateModel> getCandidates();
     public List<CandidateModel> findAllByIds(List<UUID> candidateIds);
+    public boolean existsById(UUID candidateId);
 }

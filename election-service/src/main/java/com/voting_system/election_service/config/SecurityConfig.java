@@ -37,6 +37,12 @@ public class SecurityConfig {
                     "/api/election-service/elections/*/finish"
                 ).permitAll()
 
+                // Foto de candidato: la carga un <img>, que no envía el token.
+                .requestMatchers(
+                    HttpMethod.GET,
+                    "/api/election-service/candidates/*/photo"
+                ).permitAll()
+
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(

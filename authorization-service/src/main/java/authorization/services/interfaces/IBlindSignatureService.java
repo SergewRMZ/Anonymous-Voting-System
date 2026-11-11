@@ -7,4 +7,5 @@ import authorization.dto.BlindSignatureRequest;
 
 public interface IBlindSignatureService {
     public BlindSignatureModel generateBlindSignature(UUID electionId, UUID userId, BlindSignatureRequest request);
+    public boolean hasRequestedAuthorization(UUID electionId, UUID userId);
 }

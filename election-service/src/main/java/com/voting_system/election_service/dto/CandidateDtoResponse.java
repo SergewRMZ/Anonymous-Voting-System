@@ -8,7 +8,8 @@ public record CandidateDtoResponse(
     String name,
     String lastName,
     String description,
-    boolean isActive
+    boolean isActive,
+    boolean hasPhoto
 ) {
     public static CandidateDtoResponse fromModel(CandidateModel model) {
         return new CandidateDtoResponse(
@@ -16,7 +17,8 @@ public record CandidateDtoResponse(
             model.getName(), 
             model.getLastName(), 
             model.getDescription(),
-            model.isActive()
+            model.isActive(),
+            model.isHasPhoto()
         );
     }
 }

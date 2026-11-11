@@ -16,13 +16,7 @@ public record ElectionCandidacyDtoResponse(
         
         return new ElectionCandidacyDtoResponse(
             candidacyModel.getId(),
-            new CandidateDtoResponse(
-                candidateModel.getId(),
-                candidateModel.getName(),
-                candidateModel.getLastName(),
-                candidateModel.getDescription(),
-                candidateModel.isActive()
-            )
+            CandidateDtoResponse.fromModel(candidateModel)
         );
     }
 }

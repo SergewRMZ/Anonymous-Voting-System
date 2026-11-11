@@ -13,7 +13,7 @@ public record CreateCandidateDtoRequest (
     String lastName,
 
     @NotBlank (message = "Description is required")
-    @Size (max = 100, message = "Candidate description must not have more than 100 characters")
+    @Size (max = 300, message = "Candidate description must not have more than 300 characters")
     String description
 ) {
 
