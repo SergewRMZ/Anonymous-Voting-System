@@ -32,7 +32,6 @@ services:
   # ---- Identidad ----
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.1
-    # Modo producción. Importa el realm solo si todavía no existe en la base.
     command: start --import-realm
     restart: unless-stopped
     mem_limit: 1g
@@ -45,7 +44,7 @@ services:
       KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_DB_POOL_MAX_SIZE: 10
-      # Detrás de NGINX: https://PUBLIC_HOSTNAME/auth. NGINX termina el HTTPS.
+
       KC_HOSTNAME: ${PUBLIC_HOSTNAME}
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HTTP_ENABLED: "true"
