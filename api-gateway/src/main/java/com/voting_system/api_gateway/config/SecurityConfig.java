@@ -2,9 +2,11 @@ package com.voting_system.api_gateway.config;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +16,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.config.Customizer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import com.voting_system.api_gateway.enums.UserRole;
 
@@ -26,6 +32,8 @@ public class SecurityConfig {
         return serverHttpSecurity
             // CSRF solo es necesaria cuando se trabaja con cookies
             .csrf(csrf -> csrf.disable())
+            // El frontend se sirve desde otro dominio: usa corsConfigurationSource()
+            .cors(Customizer.withDefaults())
             .authorizeExchange(exchanges -> exchanges
 
                 // Tally Service
@@ -73,6 +81,8 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.GET, "/api/authorization-service/elections/*/blind-signature/me").hasRole(UserRole.VOTER.name())
 
                 // election-service
+                // La autoridad finaliza la elección después de contabilizar los votos.
+                .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/finish").hasRole(UserRole.AUTHORITY.name())
                 .pathMatchers(HttpMethod.POST, "/api/election-service/elections").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PUT, "/api/election-service/elections/*").hasRole(UserRole.ADMIN.name())
                 .pathMatchers(HttpMethod.PATCH, "/api/election-service/elections/*/publish").hasRole(UserRole.ADMIN.name())
@@ -97,6 +107,25 @@ public class SecurityConfig {
                 jwtSpec.jwtAuthenticationConverter(reactiveJwtAuthenticationConverterAdapter());
             }))
             .build();
+    }
+
+    /**
+     * Orígenes del frontend que pueden llamar a la API desde el navegador, separados por comas.
+     * En local no hace falta: Vite reenvía /api al gateway desde el mismo origen.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
+        @Value("${CORS_ALLOWED_ORIGINS:http://localhost:5173}") List<String> allowedOrigins
+    ) {
+        CorsConfiguration cors = new CorsConfiguration();
+        cors.setAllowedOrigins(allowedOrigins);
+        cors.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cors.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        cors.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cors);
+        return source;
     }
 
     private ReactiveJwtAuthenticationConverterAdapter reactiveJwtAuthenticationConverterAdapter () {

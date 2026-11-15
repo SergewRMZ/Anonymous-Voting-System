@@ -32,10 +32,11 @@ public class SecurityConfig {
                     "/api/election-service/elections/*/structure"
                 ).permitAll()
 
+                // La autoridad electoral la finaliza después de contabilizar los votos.
                 .requestMatchers(
-                    HttpMethod.PATCH, 
+                    HttpMethod.PATCH,
                     "/api/election-service/elections/*/finish"
-                ).permitAll()
+                ).hasRole("AUTHORITY")
 
                 // Foto de candidato: la carga un <img>, que no envía el token.
                 .requestMatchers(

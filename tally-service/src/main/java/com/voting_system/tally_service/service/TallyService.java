@@ -47,21 +47,15 @@ public class TallyService {
     }
 
     public List<ElectionResultModel> voteTallying(UUID electionId) {
-        GetElectionStatusDto getElectionStatusResponse = electionServiceClient.getElectionStatus(electionId);
-        if(getElectionStatusResponse.status() == ElectionStatus.FINISHED) {
-            throw new ElectionAlreadyTalliedException(electionId);
-        }
-        
-        if(getElectionStatusResponse.status() != ElectionStatus.CLOSED) {
+        // La autoridad finaliza la elección después, con PATCH /finish en election-service.
+        // También se acepta FINISHED: si se finalizó antes de contar, el conteo no queda bloqueado.
+        ElectionStatus status = electionServiceClient.getElectionStatus(electionId).status();
+        if(status != ElectionStatus.CLOSED && status != ElectionStatus.FINISHED) {
             throw new ElectionNotClosedException(electionId);
         }
 
-        // Un intento anterior guardó los resultados, pero no pudo finalizar la elección:
-        // se reutilizan en lugar de repetir el conteo.
         if(electionResultRepositoryPort.existsByElectionId(electionId)) {
-            List<ElectionResultModel> savedResults = electionResultRepositoryPort.findAllByElectionId(electionId);
-            electionServiceClient.finishElection(electionId);
-            return savedResults;
+            throw new ElectionAlreadyTalliedException(electionId);
         }
         
         GetElectionStructureDto response = electionServiceClient.getElectionStructureDto(electionId);
@@ -79,9 +73,7 @@ public class TallyService {
         );
 
         List<ElectionResultModel> results = processEncryptedResults(electionId, encryptedResults);
-        results = electionResultRepositoryPort.saveAll(results);
-        electionServiceClient.finishElection(electionId);
-        return results;
+        return electionResultRepositoryPort.saveAll(results);
     }
 
     private List<ElectionResultModel> processEncryptedResults(UUID electionId, List<EncryptedResult> encryptedResults) {

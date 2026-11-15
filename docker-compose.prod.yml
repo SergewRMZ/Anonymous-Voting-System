@@ -1,0 +1,181 @@
+# Despliegue en la VM de Azure. Las bases de datos están en Neon y NGINX (instalado en la VM,
+# fuera de Docker) recibe el HTTPS y reenvía /auth a Keycloak y /api al gateway.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# Solo Keycloak y el gateway publican puertos, y únicamente en 127.0.0.1: desde internet
+# no se alcanzan sin pasar por NGINX.
+name: voting-system-prod
+
+# Límites de memoria de los servicios Spring (VM de 4 GiB): heap fijo en lugar del 25 % de la RAM.
+x-java: &java-opts
+  JAVA_TOOL_OPTIONS: "-Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -Xss512k"
+
+# Conexión a la base del sistema (Neon) y validación de tokens.
+# El emisor es la URL pública; las claves públicas (JWKS) se piden a Keycloak por la red interna.
+x-db-and-jwt: &db-and-jwt
+  SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
+  KEYCLOAK_ISSUER_URI: https://${PUBLIC_HOSTNAME}/auth/realms/${KEYCLOAK_REALM}
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
+
+# Rotación de logs para no llenar el disco.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # ---- Identidad ----
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    # Modo producción. Importa el realm solo si todavía no existe en la base.
+    command: start --import-realm
+    restart: unless-stopped
+    mem_limit: 1g
+    logging: *logging
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: ${KEYCLOAK_DB_URL}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_DB_POOL_MAX_SIZE: 10
+      # Detrás de NGINX: https://PUBLIC_HOSTNAME/auth. NGINX termina el HTTPS.
+      KC_HOSTNAME: ${PUBLIC_HOSTNAME}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: 8080
+      KC_PROXY_HEADERS: xforwarded
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      JAVA_OPTS_APPEND: "-Xms256m -Xmx512m"
+    ports:
+      - "127.0.0.1:8081:8080"
+    networks:
+      - backend
+
+  # ---- Punto de entrada ----
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *logging
+    environment:
+      <<: *java-opts
+      KEYCLOAK_ISSUER_URI: https://${PUBLIC_HOSTNAME}/auth/realms/${KEYCLOAK_REALM}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
+      KEYCLOAK_API_GATEWAY_CLIENT_ID: ${KEYCLOAK_API_GATEWAY_CLIENT_ID}
+      KEYCLOAK_API_GATEWAY_CLIENT_SECRET: ${KEYCLOAK_API_GATEWAY_CLIENT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      AUTHORIZATION_SERVICE_URL: http://authorization-service:8080
+      AUTHENTICATION_SERVICE_URL: http://authentication-service:8082
+      ELECTION_SERVICE_URL: http://election-service:8083
+      TALLY_SERVICE_URL: http://tally-service:8084
+      BULLETIN_BOARD_SERVICE_URL: http://bulletin-board:8085
+    ports:
+      - "127.0.0.1:9000:9000"
+    depends_on:
+      - keycloak
+      - authorization-service
+      - authentication-service
+      - election-service
+      - tally-service
+      - bulletin-board
+    networks:
+      - backend
+
+  # ---- Microservicios: sin puertos publicados ----
+  authorization-service:
+    build:
+      context: .
+      dockerfile: authorization-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *logging
+    environment:
+      <<: [*java-opts, *db-and-jwt]
+      APP_KEYS_DIRECTORY: /data/keys
+    volumes:
+      # Claves privadas RSA (firma ciega), fuera de la carpeta del repositorio.
+      - ${KEYS_DIR}/authorization:/data/keys
+    networks:
+      - backend
+
+  authentication-service:
+    build:
+      context: .
+      dockerfile: authentication-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *logging
+    environment:
+      <<: *java-opts
+      # API de administración de Keycloak por la red interna.
+      KEYCLOAK_SERVER_URL: http://keycloak:8080/auth
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_AUTH_SERVICE_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_AUTH_SERVICE_CLIENT_SECRET}
+    depends_on:
+      - keycloak
+    networks:
+      - backend
+
+  election-service:
+    build:
+      context: .
+      dockerfile: election-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *logging
+    environment:
+      <<: [*java-opts, *db-and-jwt]
+    networks:
+      - backend
+
+  tally-service:
+    build:
+      context: .
+      dockerfile: tally-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *logging
+    environment:
+      <<: [*java-opts, *db-and-jwt]
+      BULLETIN_BOARD_SERVICE_URL: http://bulletin-board:8085
+      ELECTION_SERVICE_BASE_URL: http://election-service:8083
+      APP_KEYS_DIRECTORY: /data/keys
+    volumes:
+      # Claves privadas ElGamal (cifrado), fuera de la carpeta del repositorio.
+      - ${KEYS_DIR}/tally:/data/keys
+    networks:
+      - backend
+
+  bulletin-board:
+    build:
+      context: .
+      dockerfile: bulletin-board/Dockerfile
+    restart: unless-stopped
+    mem_limit: 512m
+    logging: *logging
+    environment:
+      <<: *java-opts
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
+      AUTHORIZATION_SERVICE_URL: http://authorization-service:8080
+      ELECTION_SERVICE_BASE_URL: http://election-service:8083
+    networks:
+      - backend
+
+networks:
+  # A diferencia de preproducción, no es "internal": los servicios necesitan salir a internet
+  # para llegar a Neon. Siguen sin publicar puertos, así que desde fuera no se alcanzan.
+  backend:

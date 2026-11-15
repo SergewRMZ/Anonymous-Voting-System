@@ -36,6 +36,8 @@ tally-service/keys
 postgres/
 .env
 .env.*
+# Plantilla sin secretos del despliegue en la VM
+!.env.prod.example
 README-docs.md
 COMMANDS.md
 keycloak/import/

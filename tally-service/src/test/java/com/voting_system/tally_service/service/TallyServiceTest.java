@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,7 +15,6 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InOrder;
 
 import com.voting_system.tally_service.client.BulletinBoardServiceClient;
 import com.voting_system.tally_service.client.ElectionServiceClient;
@@ -87,7 +84,7 @@ class TallyServiceTest {
     }
 
     @Test
-    void primerConteoGuardaLosResultadosAntesDeFinalizar() {
+    void conteoDeEleccionCerradaGuardaLosResultadosSinFinalizarla() {
         givenElectionStatus(ElectionStatus.CLOSED);
         givenNoPreviousResultsAndOneCandidacy();
 
@@ -95,56 +92,39 @@ class TallyServiceTest {
 
         assertEquals(1, results.size());
         assertEquals(candidacyId, results.get(0).getCandidacyId());
-        InOrder order = inOrder(electionResultRepository, electionServiceClient);
-        order.verify(electionResultRepository).saveAll(anyList());
-        order.verify(electionServiceClient).finishElection(electionId);
+        verify(electionResultRepository).saveAll(anyList());
     }
 
     @Test
-    void reintentoReutilizaLosResultadosGuardadosYFinalizaLaEleccion() {
-        givenElectionStatus(ElectionStatus.CLOSED);
-        List<ElectionResultModel> saved = List.of(ElectionResultModel.builder().candidacyId(candidacyId).result(7).build());
-        when(electionResultRepository.existsByElectionId(electionId)).thenReturn(true);
-        when(electionResultRepository.findAllByElectionId(electionId)).thenReturn(saved);
+    void eleccionFinalizadaSinResultadosSePuedeContar() {
+        givenElectionStatus(ElectionStatus.FINISHED);
+        givenNoPreviousResultsAndOneCandidacy();
 
         List<ElectionResultModel> results = tallyService.voteTallying(electionId);
 
-        assertEquals(saved, results);
-        verify(electionServiceClient).finishElection(electionId);
+        assertEquals(1, results.size());
+        verify(electionResultRepository).saveAll(anyList());
+    }
+
+    @Test
+    void eleccionYaContadaSeRechazaSinVolverAContar() {
+        givenElectionStatus(ElectionStatus.CLOSED);
+        when(electionResultRepository.existsByElectionId(electionId)).thenReturn(true);
+
+        assertThrows(ElectionAlreadyTalliedException.class, () -> tallyService.voteTallying(electionId));
+
         verify(electionResultRepository, never()).saveAll(anyList());
         verify(privateEncryptionKeyRepository, never()).readPrivateKey(any());
         verify(electionServiceClient, never()).getElectionStructureDto(any());
     }
 
     @Test
-    void fallaAlFinalizarConservaLosResultadosParaElReintento() {
-        givenElectionStatus(ElectionStatus.CLOSED);
-        givenNoPreviousResultsAndOneCandidacy();
-        doThrow(new IllegalStateException("election-service no disponible"))
-            .when(electionServiceClient).finishElection(electionId);
-
-        assertThrows(IllegalStateException.class, () -> tallyService.voteTallying(electionId));
-
-        verify(electionResultRepository).saveAll(anyList());
-    }
-
-    @Test
-    void eleccionFinalizadaSeRechazaSinVolverAContar() {
-        givenElectionStatus(ElectionStatus.FINISHED);
-
-        assertThrows(ElectionAlreadyTalliedException.class, () -> tallyService.voteTallying(electionId));
-
-        verify(electionResultRepository, never()).saveAll(anyList());
-        verify(electionServiceClient, never()).finishElection(any());
-    }
-
-    @Test
-    void eleccionNoCerradaSeRechazaSinReutilizarResultados() {
+    void eleccionNoCerradaSeRechazaSinConsultarResultados() {
         givenElectionStatus(ElectionStatus.ACTIVE);
 
         assertThrows(ElectionNotClosedException.class, () -> tallyService.voteTallying(electionId));
 
         verify(electionResultRepository, never()).existsByElectionId(any());
-        verify(electionServiceClient, never()).finishElection(any());
+        verify(electionResultRepository, never()).saveAll(anyList());
     }
 }
