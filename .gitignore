@@ -40,4 +40,8 @@ postgres/
 !.env.prod.example
 README-docs.md
 COMMANDS.md
-keycloak/import/
+# Solo se versiona el realm exportado desde la consola (exportación parcial: secretos
+# enmascarados y sin usuarios). Una exportación con kc.sh export incluye secretos reales
+# y contraseñas de usuarios: nunca la subas.
+keycloak/import/*
+!keycloak/import/realm-export.json
