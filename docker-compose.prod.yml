@@ -11,15 +11,16 @@ name: voting-system-prod
 x-java: &java-opts
   JAVA_TOOL_OPTIONS: "-Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -Xss512k"
 
-# Conexión a la base del sistema (Neon) y validación de tokens.
-# El emisor es la URL pública; las claves públicas (JWKS) se piden a Keycloak por la red interna.
-x-db-and-jwt: &db-and-jwt
-  SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
+# Validación de tokens: el emisor es la URL pública; las claves públicas (JWKS) se piden
+# a Keycloak por la red interna.
+x-jwt: &jwt
   KEYCLOAK_ISSUER_URI: https://${PUBLIC_HOSTNAME}/auth/realms/${KEYCLOAK_REALM}
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
+
+# Base del sistema (Neon). Cada servicio entra con su propio rol y a su propio esquema
+# (deploy/neon/service-roles.sql): no puede leer ni modificar las tablas de los demás.
+x-db-pool: &db-pool
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
 
 # Rotación de logs para no llenar el disco.
 x-logging: &logging
@@ -99,7 +100,10 @@ services:
     mem_limit: 512m
     logging: *logging
     environment:
-      <<: [*java-opts, *db-and-jwt]
+      <<: [*java-opts, *jwt, *db-pool]
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=authz
+      POSTGRES_USER: ${AUTHZ_DB_USER}
+      POSTGRES_PASSWORD: ${AUTHZ_DB_PASSWORD}
       APP_KEYS_DIRECTORY: /data/keys
     volumes:
       # Claves privadas RSA (firma ciega), fuera de la carpeta del repositorio.
@@ -134,7 +138,10 @@ services:
     mem_limit: 512m
     logging: *logging
     environment:
-      <<: [*java-opts, *db-and-jwt]
+      <<: [*java-opts, *jwt, *db-pool]
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=election
+      POSTGRES_USER: ${ELECTION_DB_USER}
+      POSTGRES_PASSWORD: ${ELECTION_DB_PASSWORD}
     networks:
       - backend
 
@@ -146,7 +153,10 @@ services:
     mem_limit: 512m
     logging: *logging
     environment:
-      <<: [*java-opts, *db-and-jwt]
+      <<: [*java-opts, *jwt, *db-pool]
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=tally
+      POSTGRES_USER: ${TALLY_DB_USER}
+      POSTGRES_PASSWORD: ${TALLY_DB_PASSWORD}
       BULLETIN_BOARD_SERVICE_URL: http://bulletin-board:8085
       ELECTION_SERVICE_BASE_URL: http://election-service:8083
       APP_KEYS_DIRECTORY: /data/keys
@@ -164,11 +174,10 @@ services:
     mem_limit: 512m
     logging: *logging
     environment:
-      <<: *java-opts
-      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
+      <<: [*java-opts, *db-pool]
+      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=bulletin
+      POSTGRES_USER: ${BULLETIN_DB_USER}
+      POSTGRES_PASSWORD: ${BULLETIN_DB_PASSWORD}
       AUTHORIZATION_SERVICE_URL: http://authorization-service:8080
       ELECTION_SERVICE_BASE_URL: http://election-service:8083
     networks:
