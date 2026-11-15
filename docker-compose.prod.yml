@@ -17,8 +17,8 @@ x-jwt: &jwt
   KEYCLOAK_ISSUER_URI: https://${PUBLIC_HOSTNAME}/auth/realms/${KEYCLOAK_REALM}
   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/certs
 
-# Base del sistema (Neon). Cada servicio entra con su propio rol y a su propio esquema
-# (deploy/neon/service-roles.sql): no puede leer ni modificar las tablas de los demás.
+# Bases del sistema (Neon). Cada servicio tiene su propia base de datos, con su propia
+# cadena de conexión y su propio usuario: no puede leer ni modificar las tablas de los demás.
 x-db-pool: &db-pool
   SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: 5
 
@@ -101,7 +101,7 @@ services:
     logging: *logging
     environment:
       <<: [*java-opts, *jwt, *db-pool]
-      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=authz
+      SPRING_DATASOURCE_URL: ${AUTHZ_DB_URL}
       POSTGRES_USER: ${AUTHZ_DB_USER}
       POSTGRES_PASSWORD: ${AUTHZ_DB_PASSWORD}
       APP_KEYS_DIRECTORY: /data/keys
@@ -139,7 +139,7 @@ services:
     logging: *logging
     environment:
       <<: [*java-opts, *jwt, *db-pool]
-      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=election
+      SPRING_DATASOURCE_URL: ${ELECTION_DB_URL}
       POSTGRES_USER: ${ELECTION_DB_USER}
       POSTGRES_PASSWORD: ${ELECTION_DB_PASSWORD}
     networks:
@@ -154,7 +154,7 @@ services:
     logging: *logging
     environment:
       <<: [*java-opts, *jwt, *db-pool]
-      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=tally
+      SPRING_DATASOURCE_URL: ${TALLY_DB_URL}
       POSTGRES_USER: ${TALLY_DB_USER}
       POSTGRES_PASSWORD: ${TALLY_DB_PASSWORD}
       BULLETIN_BOARD_SERVICE_URL: http://bulletin-board:8085
@@ -175,7 +175,7 @@ services:
     logging: *logging
     environment:
       <<: [*java-opts, *db-pool]
-      SPRING_DATASOURCE_URL: ${VOTING_DB_URL}&currentSchema=bulletin
+      SPRING_DATASOURCE_URL: ${BULLETIN_DB_URL}
       POSTGRES_USER: ${BULLETIN_DB_USER}
       POSTGRES_PASSWORD: ${BULLETIN_DB_PASSWORD}
       AUTHORIZATION_SERVICE_URL: http://authorization-service:8080

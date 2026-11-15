@@ -28,6 +28,7 @@ import com.voting_system.bulletin_board.crypto.RsaBssaVerifier;
 import com.voting_system.bulletin_board.dto.CreateVoteRequestDto;
 import com.voting_system.bulletin_board.exceptions.DuplicateVoteException;
 import com.voting_system.bulletin_board.exceptions.ElectionNotActiveException;
+import com.voting_system.bulletin_board.exceptions.UnknownAuthorizationKeyException;
 import com.voting_system.bulletin_board.model.Ballot;
 import com.voting_system.bulletin_board.model.ElGamalCiphertext;
 import com.voting_system.bulletin_board.model.EncryptedVote;
@@ -40,6 +41,7 @@ import tools.jackson.databind.ObjectMapper;
 
 class VoteServiceAdapterTest {
     private VoteRepositoryPort voteRepository;
+    private AuthorizationServiceClient authorizationServiceClient;
     private ElectionServiceClient electionServiceClient;
     private RsaBssaVerifier verifier;
     private VoteServiceAdapter voteService;
@@ -50,15 +52,17 @@ class VoteServiceAdapterTest {
     @BeforeEach
     void setUp() {
         voteRepository = mock(VoteRepositoryPort.class);
+        authorizationServiceClient = mock(AuthorizationServiceClient.class);
         electionServiceClient = mock(ElectionServiceClient.class);
         verifier = mock(RsaBssaVerifier.class);
 
+        // La clave de autorización de la elección, como la entregaría authorization-service.
         AuthorizationPublicKeyCache cache = new AuthorizationPublicKeyCache();
-        cache.put(authorizationKeysId, mock(PublicKey.class));
+        cache.put(electionId, authorizationKeysId, mock(PublicKey.class));
 
         voteService = new VoteServiceAdapter(
             voteRepository,
-            mock(AuthorizationServiceClient.class),
+            authorizationServiceClient,
             electionServiceClient,
             cache,
             verifier
@@ -71,8 +75,12 @@ class VoteServiceAdapterTest {
     }
 
     private CreateVoteRequestDto vote() {
+        return vote(authorizationKeysId);
+    }
+
+    private CreateVoteRequestDto vote(UUID declaredKeyId) {
         EncryptedVote encryptedVote = new EncryptedVote(
-            authorizationKeysId,
+            declaredKeyId,
             List.of(new Position(
                 UUID.randomUUID(),
                 List.of(new Ballot(UUID.randomUUID(), new ElGamalCiphertext("c1", "c2")))
@@ -114,5 +122,18 @@ class VoteServiceAdapterTest {
             () -> voteService.submitVote(electionId, vote())
         );
         verify(electionServiceClient, never()).getElectionStatus(any());
+    }
+
+    @Test
+    void rejectsVoteThatDeclaresAKeyFromAnotherElection() {
+        electionIs(ElectionStatus.ACTIVE);
+        when(verifier.verify(any(), any(), any())).thenReturn(true);
+
+        assertThrows(
+            UnknownAuthorizationKeyException.class,
+            () -> voteService.submitVote(electionId, vote(UUID.randomUUID()))
+        );
+        verify(verifier, never()).verify(any(), any(), any());
+        verify(voteRepository, never()).save(any());
     }
 }

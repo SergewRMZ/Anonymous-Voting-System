@@ -21,6 +21,7 @@ import com.voting_system.bulletin_board.dto.CreateVoteResponseDto;
 import com.voting_system.bulletin_board.dto.VoteRecordResponseDto;
 import com.voting_system.bulletin_board.exceptions.DuplicateVoteException;
 import com.voting_system.bulletin_board.exceptions.ElectionNotActiveException;
+import com.voting_system.bulletin_board.exceptions.UnknownAuthorizationKeyException;
 import com.voting_system.bulletin_board.exceptions.VoteVerificationException;
 import com.voting_system.bulletin_board.model.VoteModel;
 import com.voting_system.bulletin_board.repository.VoteBallotProjection;
@@ -52,18 +53,14 @@ public class VoteServiceAdapter implements IVoteService {
         }
         
         VoteModel voteModel = voteRequest.toModel(electionId);
-        UUID authorizationKeysId = voteModel.getEncryptedVote().authorizationKeysId();
-        
-        // Si no existe la clave pública en la caché, la solicitará al servicio la almacenará.
-        if(!authorizationPublicKeyCache.hasPublicKey(authorizationKeysId)) {
-            AuthorizationPublicKey authorizationPublicKey = authorizationServiceClient.getPublicKey(electionId);
-            byte[] n = CryptoUtils.base64UrlToBytes(authorizationPublicKey.publicKey().n());
-            byte[] e = CryptoUtils.base64ToBytes(authorizationPublicKey.publicKey().e());
 
-            PublicKey publicKey = rsaBssaVerifier.fromModulusAndExponent(n, e);
-            authorizationPublicKeyCache.put(authorizationKeysId, publicKey);
+        // La clave con la que se verifica la decide authorization-service, no el cliente:
+        // el voto debe declarar la clave de autorización de esta misma elección.
+        AuthorizationPublicKeyCache.ElectionKey electionKey = getElectionKey(electionId);
+        if(!electionKey.authorizationKeysId().equals(voteModel.getEncryptedVote().authorizationKeysId())) {
+            throw new UnknownAuthorizationKeyException();
         }
-        
+
         ObjectMapper objectMapper = new ObjectMapper();
         String voteJson = objectMapper.writeValueAsString(voteModel.getEncryptedVote());
         String voteJsonCanonicalized = JsonUtils.canonicalize(voteJson);
@@ -75,7 +72,7 @@ public class VoteServiceAdapter implements IVoteService {
             throw new VoteVerificationException();
         }
         
-        PublicKey publicKey = authorizationPublicKeyCache.getPublicKey(authorizationKeysId);
+        PublicKey publicKey = electionKey.publicKey();
         byte[] signature = CryptoUtils.base64ToBytes(voteModel.getSignature());
         byte[] randomizer = CryptoUtils.base64ToBytes(voteModel.getRandomizer());
         byte[] preparedMessage = CryptoUtils.concatenate(randomizer, calculatedDigest);
@@ -91,6 +88,23 @@ public class VoteServiceAdapter implements IVoteService {
 
         voteModel = voteRepositoryPort.save(voteModel);
         return new CreateVoteResponseDto(voteModel.getId());
+    }
+
+    /** Clave de autorización activa de la elección, desde la caché o desde authorization-service. */
+    private AuthorizationPublicKeyCache.ElectionKey getElectionKey(UUID electionId) {
+        return authorizationPublicKeyCache.get(electionId).orElseGet(() -> {
+            AuthorizationPublicKey authorizationPublicKey = authorizationServiceClient.getPublicKey(electionId);
+            if(!electionId.equals(authorizationPublicKey.electionId())) {
+                throw new VoteVerificationException();
+            }
+
+            byte[] n = CryptoUtils.base64UrlToBytes(authorizationPublicKey.publicKey().n());
+            byte[] e = CryptoUtils.base64ToBytes(authorizationPublicKey.publicKey().e());
+            PublicKey publicKey = rsaBssaVerifier.fromModulusAndExponent(n, e);
+
+            authorizationPublicKeyCache.put(electionId, authorizationPublicKey.authorizationKeysId(), publicKey);
+            return new AuthorizationPublicKeyCache.ElectionKey(authorizationPublicKey.authorizationKeysId(), publicKey);
+        });
     }
 
     @Override

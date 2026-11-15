@@ -50,6 +50,19 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    // El voto declara una clave que no es la clave de autorización de su elección.
+    @ExceptionHandler (UnknownAuthorizationKeyException.class)
+    public ProblemDetail handleUnknownAuthorizationKeyException(UnknownAuthorizationKeyException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.UNPROCESSABLE_CONTENT,
+            ex.getMessage()
+        );
+
+        problemDetail.setTitle("Unknown Authorization Key");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler (DuplicateVoteException.class)
     public ProblemDetail handleDuplicateVoteException(DuplicateVoteException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
