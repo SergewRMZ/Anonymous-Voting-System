@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -21,20 +20,14 @@ import lombok.Setter;
 @Entity 
 @Table (
     name = "election_results",
+    // El índice de esta restricción empieza por election_id, así que también sirve para
+    // consultar los resultados de una elección: no hace falta un índice aparte.
     uniqueConstraints = {
         @UniqueConstraint (
             name = "uk_tally_election_position_candidacy",
             columnNames = {"election_id", "election_position_id", "candidacy_id"}
         )
-    },
-
-    indexes = {
-        @Index (
-            name = "idx_election_results_by_election_id",
-            columnList = "election_id"
-        )
     }
-
 )
 @Getter @Setter
 @AllArgsConstructor 

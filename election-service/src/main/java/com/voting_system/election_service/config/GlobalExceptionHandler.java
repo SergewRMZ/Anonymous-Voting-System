@@ -22,6 +22,16 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(PositionAlreadyExistsException.class)
+    public ProblemDetail handlePositionAlreadyExistsException(PositionAlreadyExistsException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Position Already Exists");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler(InvalidElectionDateException.class)
     public ProblemDetail handleInvalidElectionDateException(InvalidElectionDateException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(

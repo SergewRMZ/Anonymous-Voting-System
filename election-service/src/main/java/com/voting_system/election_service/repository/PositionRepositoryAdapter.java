@@ -33,6 +33,12 @@ public class PositionRepositoryAdapter implements IPositionRepository {
             .toList();
     }
 
+    /** Sin distinguir mayúsculas: "Presidente" y "presidente" son el mismo cargo. */
+    @Override
+    public boolean existsByPositionName(String positionName) {
+        return jpaPositionRepository.existsByPositionNameIgnoreCase(positionName);
+    }
+
     @Override
     public List<PositionModel> getByIds(List<UUID> ids) {
         return jpaPositionRepository.findAllById(ids)

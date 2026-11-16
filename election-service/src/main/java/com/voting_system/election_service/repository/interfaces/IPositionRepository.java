@@ -9,4 +9,5 @@ public interface IPositionRepository {
     public PositionModel save(PositionModel positionModel);
     public List<PositionModel> getPositions();
     public List<PositionModel> getByIds(List<UUID> ids);
+    public boolean existsByPositionName(String positionName);
 }

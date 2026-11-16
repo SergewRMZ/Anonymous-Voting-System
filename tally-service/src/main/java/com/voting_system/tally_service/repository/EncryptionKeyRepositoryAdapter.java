@@ -29,7 +29,8 @@ public class EncryptionKeyRepositoryAdapter implements EncryptionKeyRepositoryPo
 
     @Override
     public EncryptionKeyModel save(EncryptionKeyModel model) {
-        JpaEncryptionKeyEntity encryptionKeyEntity = jpaEncryptionRepository.save(encryptionKeyMapper.toEntity(model));
+        // saveAndFlush: la restricción única se comprueba aquí, antes de escribir la clave privada.
+        JpaEncryptionKeyEntity encryptionKeyEntity = jpaEncryptionRepository.saveAndFlush(encryptionKeyMapper.toEntity(model));
         return encryptionKeyMapper.toModel(encryptionKeyEntity);
     }
 }

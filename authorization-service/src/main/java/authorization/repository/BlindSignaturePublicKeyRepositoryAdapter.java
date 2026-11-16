@@ -21,7 +21,8 @@ public class BlindSignaturePublicKeyRepositoryAdapter implements BlindSignatureP
     @Override
     public BlindSignaturePublicKeyModel save(BlindSignaturePublicKeyModel blindSignaturePublicKeyModel) {
         JpaBlindSignaturePublicKeyEntity entity = blindSignaturePublicKeyMapper.toEntity(blindSignaturePublicKeyModel);
-        return blindSignaturePublicKeyMapper.toModel(jpaBlindSignaturePublicKeyRepository.save(entity));
+        // saveAndFlush: la restricción única se comprueba aquí, antes de escribir la clave privada.
+        return blindSignaturePublicKeyMapper.toModel(jpaBlindSignaturePublicKeyRepository.saveAndFlush(entity));
     }
 
     @Override 

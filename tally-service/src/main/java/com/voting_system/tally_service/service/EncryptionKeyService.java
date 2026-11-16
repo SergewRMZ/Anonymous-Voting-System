@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.voting_system.tally_service.crypto.ElGamalKeyGenerator;
 import com.voting_system.tally_service.exception.EncryptionKeysAlreadyExists;
@@ -23,16 +25,29 @@ public class EncryptionKeyService implements IEncryptionKeyService {
     private final PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
     private final ElGamalKeyGenerator elGamalKeyGenerator;
 
-    @Override 
+    /**
+     * Registra la clave pública y después escribe la privada, en una sola transacción.
+     * El orden importa: la clave privada se guarda en un archivo por elección, así que si dos
+     * solicitudes simultáneas la escribieran antes de registrar la pública, la segunda
+     * sobrescribiría la privada de la primera y la elección ya no podría contarse.
+     */
+    @Override
+    @Transactional
     public EncryptionKeyModel createEncryptionKeys(UUID electionId) {
         if(encryptionKeyRepository.existsByElectionId(electionId)) {
             throw new EncryptionKeysAlreadyExists("Encryption keys already exists for this election: " + electionId);
         }
 
-        elGamalKeyGenerator.generateKeys();
-        String publicKey = Base64
-            .getEncoder()
-            .encodeToString(elGamalKeyGenerator.getPublicKey());
+        // El generador es un bean compartido que guarda el último par generado: se genera y se
+        // leen ambas claves en un solo bloque para no mezclar pares de dos elecciones simultáneas.
+        byte[] publicKeyBytes;
+        byte[] privateKeyBytes;
+        synchronized (elGamalKeyGenerator) {
+            elGamalKeyGenerator.generateKeys();
+            publicKeyBytes = elGamalKeyGenerator.getPublicKey();
+            privateKeyBytes = elGamalKeyGenerator.getPrivateKey();
+        }
+        String publicKey = Base64.getEncoder().encodeToString(publicKeyBytes);
 
         EncryptionKeyModel encryptionKeyModel = EncryptionKeyModel.builder()
             .electionId(electionId)
@@ -42,8 +57,17 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             .createdAt(Instant.now())
             .build();
 
-        privateEncryptionKeyRepository.savePrivateKey(electionId, elGamalKeyGenerator.getPrivateKey());
-        return encryptionKeyRepository.save(encryptionKeyModel);
+        // La restricción única rechaza la segunda de dos solicitudes simultáneas.
+        EncryptionKeyModel savedKey;
+        try {
+            savedKey = encryptionKeyRepository.save(encryptionKeyModel);
+        } catch (DataIntegrityViolationException ex) {
+            throw new EncryptionKeysAlreadyExists("Encryption keys already exists for this election: " + electionId);
+        }
+
+        // Si falla la escritura, la excepción revierte el registro de la clave pública.
+        privateEncryptionKeyRepository.savePrivateKey(electionId, privateKeyBytes);
+        return savedKey;
     }
 
     @Override 

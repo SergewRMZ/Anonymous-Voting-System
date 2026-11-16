@@ -36,7 +36,7 @@ public class ElectionController {
     private final IElectionService electionService;
 
     @PostMapping("")
-    public ResponseEntity<ElectionDtoResponse> createElection(@RequestBody CreateElectionDtoRequest createElectionDtoRequest) {        
+    public ResponseEntity<ElectionDtoResponse> createElection(@Valid @RequestBody CreateElectionDtoRequest createElectionDtoRequest) {
         ElectionModel electionModel = electionService.createElection(createElectionDtoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(
             ElectionDtoResponse.from(electionModel)

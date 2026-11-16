@@ -12,13 +12,21 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity 
-@Table (name = "encryption_keys")
+@Table (
+    name = "encryption_keys",
+    // Una sola clave de cifrado por elección: con dos, las boletas se cifrarían con una u
+    // otra y el conteo no podría descifrarlas todas.
+    uniqueConstraints = {
+        @UniqueConstraint (name = "unique_encryption_key_election", columnNames = { "election_id" })
+    }
+)
 @Getter 
 @NoArgsConstructor 
 @AllArgsConstructor 

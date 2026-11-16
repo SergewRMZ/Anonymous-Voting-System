@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +19,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "authorization_keys")
+@Table(
+    name = "authorization_keys",
+    // Una sola clave de firma ciega por elección, aunque lleguen dos solicitudes a la vez.
+    uniqueConstraints = {
+        @UniqueConstraint(name = "unique_authorization_key_election", columnNames = { "election_id" })
+    }
+)
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor

@@ -38,11 +38,11 @@ public class JpaElectionPositionEntity {
     @GeneratedValue 
     private UUID id;
 
-    @ManyToOne (optional = false)
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "election_id", nullable = false)
     private JpaElectionEntity election;
 
-    @ManyToOne (optional = false)
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn (name = "position_id", nullable = false)
     private JpaPositionEntity position;
 
