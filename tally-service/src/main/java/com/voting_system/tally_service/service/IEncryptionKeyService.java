@@ -5,6 +5,7 @@ import com.voting_system.tally_service.model.EncryptionKeyModel;
 
 public interface IEncryptionKeyService {
     public EncryptionKeyModel createEncryptionKeys(UUID electionId); 
-    public EncryptionKeyModel activateEncryptionKeys(UUID electionId); 
+    public EncryptionKeyModel activateEncryptionKeys(UUID electionId);
+    public EncryptionKeyModel expireEncryptionKeys(UUID electionId);
     public EncryptionKeyModel getPublicEncryptionKey(UUID electionId);
 }

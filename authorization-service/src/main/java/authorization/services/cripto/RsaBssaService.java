@@ -31,6 +31,10 @@ public class RsaBssaService {
     ) {
         authorizationKeys.putIfAbsent(authorizationKeysId, privateKey);
     }
+
+    public void unloadKeys(UUID authorizationKeysId) {
+        authorizationKeys.remove(authorizationKeysId);
+    }
     
     public KeyPair generateKeys() {
         try {

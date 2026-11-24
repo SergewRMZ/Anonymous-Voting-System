@@ -36,7 +36,7 @@ public class BlindSignaturePublicKeyController {
             .status(HttpStatus.CREATED).body(response);
     }
 
-    // Consulta de gestión: devuelve la llave en cualquier estado; "/public" solo responde con la llave ACTIVE.
+    // Consulta de gestión: devuelve la llave en cualquier estado; "/public" responde con la llave ACTIVE o EXPIRED.
     @GetMapping("")
     public ResponseEntity<BlindSignaturePublicKeyResponse> getKeysByElectionId(@Valid @PathVariable UUID electionId) {
         BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getPublicKeyByElectionId(electionId);
@@ -44,9 +44,10 @@ public class BlindSignaturePublicKeyController {
         return ResponseEntity.ok(response);
     }
 
+    // Pública: se sigue entregando cuando la clave expira, para verificar las firmas del tablón.
     @GetMapping("/public")
     public ResponseEntity<BlindSignaturePublicKeyResponse> getPublicKeyByElectionId(@Valid @PathVariable UUID electionId) {
-        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getActivePublicKeyByElectionId(electionId);
+        BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService.getPublishedPublicKeyByElectionId(electionId);
         BlindSignaturePublicKeyResponse response = mapper.toResponse(publicKeyModel);
         return ResponseEntity.ok(response);
     }

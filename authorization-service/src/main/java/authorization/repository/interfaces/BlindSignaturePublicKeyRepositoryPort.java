@@ -1,5 +1,6 @@
 package authorization.repository.interfaces;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,5 +12,6 @@ public interface BlindSignaturePublicKeyRepositoryPort {
     public Optional<BlindSignaturePublicKeyModel> findById(UUID authorizationKeyId);
     public Optional<BlindSignaturePublicKeyModel> findByElectionId(UUID electionId);
     public Optional<BlindSignaturePublicKeyModel> findByElectionIdAndStatus(UUID electionId, KeyStatus status);
+    public List<BlindSignaturePublicKeyModel> findAllByStatus(KeyStatus status);
     public boolean existsByElectionId(UUID electionId);
 }

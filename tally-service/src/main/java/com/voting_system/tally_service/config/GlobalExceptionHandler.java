@@ -41,6 +41,28 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler (EncryptionKeysAlreadyExpiredException.class)
+    public ProblemDetail handleEncryptionKeysAlreadyExpired(EncryptionKeysAlreadyExpiredException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Encryption Keys Already Expired");
+        problemDetail.setProperty("code", "KEYS_ALREADY_EXPIRED");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (ElectionNotTalliedException.class)
+    public ProblemDetail handleElectionNotTallied(ElectionNotTalliedException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT, ex.getMessage());
+
+        problemDetail.setTitle("Election Not Tallied");
+        problemDetail.setProperty("code", "ELECTION_NOT_TALLIED");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler (ElectionNotClosedException.class)
     public ProblemDetail handleElectionNotClosedException(ElectionNotClosedException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(

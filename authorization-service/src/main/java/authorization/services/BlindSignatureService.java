@@ -15,6 +15,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import authorization.domain.exception.BlindSignatureAlreadyExistsException;
+import authorization.domain.exception.ElectionNotActiveException;
+import authorization.client.ElectionServiceClient;
+import authorization.client.ElectionStatus;
 
 @Service 
 @RequiredArgsConstructor 
@@ -22,6 +25,7 @@ public class BlindSignatureService implements IBlindSignatureService {
     private final BlindSignatureRepositoryPort blindSignatureRepositoryPort;
     private final IBlindSignaturePublicKeyService blindSignaturePublicKeyService;
     private final RsaBssaService rsaBssaService;
+    private final ElectionServiceClient electionServiceClient;
 
 
     @Override
@@ -31,6 +35,12 @@ public class BlindSignatureService implements IBlindSignatureService {
 
     @Override
     public BlindSignatureModel generateBlindSignature(UUID electionId, UUID userId, BlindSignatureRequest request) {
+        // La clave expira poco después del cierre (lo revisa una tarea periódica), así que
+        // además se confirma que la elección siga en periodo de votación antes de firmar.
+        if (electionServiceClient.getElectionStatus(electionId) != ElectionStatus.ACTIVE) {
+            throw new ElectionNotActiveException(electionId);
+        }
+
         BlindSignaturePublicKeyModel publicKeyModel = blindSignaturePublicKeyService
             .getActivePublicKeyByElectionId(electionId);
         

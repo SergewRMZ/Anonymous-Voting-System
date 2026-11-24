@@ -38,7 +38,7 @@ public class EncryptionKeyModel {
             throw new InvalidKeyStateException("Only keys with status ACTIVE can be expired");
         }
 
-        this.status = KeyStatus.ACTIVE;
+        this.status = KeyStatus.EXPIRED;
         this.expiredAt = expiredAt;
     }
 }

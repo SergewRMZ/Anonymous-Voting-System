@@ -44,6 +44,13 @@ public class EncryptionKeyController {
         );
     }
 
+    // Se llama después del conteo: la clave privada ya no se vuelve a usar.
+    @PatchMapping("/encryption-keys/expire")
+    public ResponseEntity<EncryptionKeyDtoResponse> expire(@PathVariable UUID electionId) {
+        EncryptionKeyModel model = encryptionKeyService.expireEncryptionKeys(electionId);
+        return ResponseEntity.ok(EncryptionKeyDtoResponse.from(model));
+    }
+
     @GetMapping("/encryption-keys/public")
     public ResponseEntity<EncryptionKeyDtoResponse> getPublicKeyByElectionId(@PathVariable UUID electionId) {
         EncryptionKeyModel model = encryptionKeyService.getPublicEncryptionKey(electionId);

@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.voting_system.tally_service.crypto.ElGamalKeyGenerator;
+import com.voting_system.tally_service.exception.ElectionNotTalliedException;
 import com.voting_system.tally_service.exception.EncryptionKeysAlreadyExists;
+import com.voting_system.tally_service.exception.EncryptionKeysAlreadyExpiredException;
+import com.voting_system.tally_service.repository.ElectionResultRepositoryPort;
 import com.voting_system.tally_service.exception.EncryptionKeysNotFound;
 import com.voting_system.tally_service.model.EncryptionKeyModel;
 import com.voting_system.tally_service.model.KeyStatus;
@@ -24,6 +27,7 @@ public class EncryptionKeyService implements IEncryptionKeyService {
     private final EncryptionKeyRepositoryAdapter encryptionKeyRepository;
     private final PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
     private final ElGamalKeyGenerator elGamalKeyGenerator;
+    private final ElectionResultRepositoryPort electionResultRepository;
 
     /**
      * Registra la clave pública y después escribe la privada, en una sola transacción.
@@ -76,6 +80,26 @@ public class EncryptionKeyService implements IEncryptionKeyService {
             .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
         
         encryptionKeyModel.activate(); 
+        return encryptionKeyRepository.save(encryptionKeyModel);
+    }
+
+    /**
+     * Expira las claves de cifrado cuando la elección ya tiene resultados: a partir de ahí
+     * la clave privada no se vuelve a usar. La clave pública se sigue pudiendo consultar.
+     */
+    @Override
+    public EncryptionKeyModel expireEncryptionKeys(UUID electionId) {
+        EncryptionKeyModel encryptionKeyModel = encryptionKeyRepository.findByElectionId(electionId)
+            .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
+
+        if (encryptionKeyModel.getStatus() == KeyStatus.EXPIRED) {
+            throw new EncryptionKeysAlreadyExpiredException(electionId);
+        }
+        if (!electionResultRepository.existsByElectionId(electionId)) {
+            throw new ElectionNotTalliedException(electionId);
+        }
+
+        encryptionKeyModel.expire(Instant.now());
         return encryptionKeyRepository.save(encryptionKeyModel);
     }
 

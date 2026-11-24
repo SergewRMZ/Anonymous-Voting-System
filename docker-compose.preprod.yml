@@ -112,6 +112,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI}
       APP_KEYS_DIRECTORY: /data/keys
+      ELECTION_SERVICE_BASE_URL: http://election-service:8083
     volumes:
       - ./authorization-service/keys:/data/keys
     depends_on:

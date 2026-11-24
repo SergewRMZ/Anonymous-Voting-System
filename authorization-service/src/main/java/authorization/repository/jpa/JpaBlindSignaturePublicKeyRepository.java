@@ -1,5 +1,6 @@
 package authorization.repository.jpa;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,7 +13,7 @@ import authorization.entity.JpaBlindSignaturePublicKeyEntity;
 public interface JpaBlindSignaturePublicKeyRepository extends JpaRepository<JpaBlindSignaturePublicKeyEntity, UUID> {
     Optional<JpaBlindSignaturePublicKeyEntity> findById(UUID authorizationKeysId);
     Optional<JpaBlindSignaturePublicKeyEntity> findByElectionId(UUID electionId);
-    Optional<JpaBlindSignaturePublicKeyEntity> findByStatus(KeyStatus status);
+    List<JpaBlindSignaturePublicKeyEntity> findAllByStatus(KeyStatus status);
     Optional<JpaBlindSignaturePublicKeyEntity> findByElectionIdAndStatus(UUID electionId, KeyStatus status);
     boolean existsByElectionId(UUID electionId);
 }

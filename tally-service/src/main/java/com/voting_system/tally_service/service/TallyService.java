@@ -21,8 +21,13 @@ import com.voting_system.tally_service.crypto.EncryptedResult;
 import com.voting_system.tally_service.exception.ElectionAlreadyTalliedException;
 import com.voting_system.tally_service.exception.ElectionNotClosedException;
 import com.voting_system.tally_service.exception.ElectionNotFinishedException;
+import com.voting_system.tally_service.exception.EncryptionKeysNotFound;
+import com.voting_system.tally_service.exception.InvalidKeyStateException;
 import com.voting_system.tally_service.model.ElectionResultModel;
+import com.voting_system.tally_service.model.EncryptionKeyModel;
+import com.voting_system.tally_service.model.KeyStatus;
 import com.voting_system.tally_service.repository.ElectionResultRepositoryPort;
+import com.voting_system.tally_service.repository.EncryptionKeyRepositoryAdapter;
 import com.voting_system.tally_service.repository.PrivateEncryptionKeyRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +41,7 @@ public class TallyService {
     private final ElGamalDecryptor elGamalDecryptor;
     private final PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
     private final ElectionResultRepositoryPort electionResultRepositoryPort;
+    private final EncryptionKeyRepositoryAdapter encryptionKeyRepository;
 
     public List<ElectionResultModel> getResults(UUID electionId) {
         GetElectionStatusDto getElectionStatusDto = electionServiceClient.getElectionStatus(electionId);
@@ -57,7 +63,14 @@ public class TallyService {
         if(electionResultRepositoryPort.existsByElectionId(electionId)) {
             throw new ElectionAlreadyTalliedException(electionId);
         }
-        
+
+        // Una clave expirada ya no se usa para descifrar.
+        EncryptionKeyModel encryptionKey = encryptionKeyRepository.findByElectionId(electionId)
+            .orElseThrow(() -> new EncryptionKeysNotFound("Encryption keys not found for election with id: " + electionId));
+        if(encryptionKey.getStatus() != KeyStatus.ACTIVE) {
+            throw new InvalidKeyStateException("Encryption keys must be ACTIVE to tally the election");
+        }
+
         GetElectionStructureDto response = electionServiceClient.getElectionStructureDto(electionId);
         List<EncryptedResult> encryptedResults = new ArrayList<>();
         

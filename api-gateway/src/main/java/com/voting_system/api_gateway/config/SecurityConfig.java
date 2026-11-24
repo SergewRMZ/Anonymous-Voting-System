@@ -62,6 +62,11 @@ public class SecurityConfig {
                     "/api/tally-service/elections/*/encryption-keys/activate"
                 ).hasRole(UserRole.AUTHORITY.name())
 
+                .pathMatchers(
+                    HttpMethod.PATCH,
+                    "/api/tally-service/elections/*/encryption-keys/expire"
+                ).hasRole(UserRole.AUTHORITY.name())
+
                 // bulletin-board
                 .pathMatchers(HttpMethod.POST, "/api/bulletin-board/elections/*/votes").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/bulletin-board/elections/*/votes").permitAll()

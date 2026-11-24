@@ -48,6 +48,30 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler (ElectionNotActiveException.class)
+    public ProblemDetail handleElectionNotActiveException(ElectionNotActiveException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.CONFLICT,
+            ex.getMessage()
+        );
+
+        problemDetail.setTitle("Election Not Active");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler (ElectionStateUnavailableException.class)
+    public ProblemDetail handleElectionStateUnavailableException(ElectionStateUnavailableException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            ex.getMessage()
+        );
+
+        problemDetail.setTitle("Election State Unavailable");
+        problemDetail.setProperty("timestamp", Instant.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler (BlindSignatureAlreadyExistsException.class)
     public ProblemDetail handleBlindSignatureAlreadyExistsException(BlindSignatureAlreadyExistsException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(

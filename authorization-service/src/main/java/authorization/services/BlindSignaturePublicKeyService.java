@@ -3,6 +3,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -84,6 +85,23 @@ public class BlindSignaturePublicKeyService implements IBlindSignaturePublicKeyS
             .orElseThrow(() -> new PublicKeyNotActiveForElectionException(electionId));
     }
 
+    /**
+     * Clave pública que se publica para verificar firmas: la ACTIVE durante la votación
+     * y la EXPIRED después, para que el tablón se pueda auditar al terminar la elección.
+     * Una clave CREATED todavía no se publica.
+     */
+    @Override
+    public BlindSignaturePublicKeyModel getPublishedPublicKeyByElectionId(UUID electionId) {
+        return blindSignaturePublicKeyRepository.findByElectionId(electionId)
+            .filter(model -> model.getStatus() == KeyStatus.ACTIVE || model.getStatus() == KeyStatus.EXPIRED)
+            .orElseThrow(() -> new PublicKeyNotActiveForElectionException(electionId));
+    }
+
+    @Override
+    public List<BlindSignaturePublicKeyModel> getActiveKeys() {
+        return blindSignaturePublicKeyRepository.findAllByStatus(KeyStatus.ACTIVE);
+    }
+
     @Override
     public BlindSignaturePublicKeyModel getPublicKeyByElectionId(UUID electionId) {
         return blindSignaturePublicKeyRepository.findByElectionId(electionId)
@@ -107,6 +125,9 @@ public class BlindSignaturePublicKeyService implements IBlindSignaturePublicKeyS
                 .orElseThrow(() -> new PublicKeyNotActiveForElectionException(electionId));
 
         model.expire();
-        return blindSignaturePublicKeyRepository.save(model);
+        BlindSignaturePublicKeyModel expired = blindSignaturePublicKeyRepository.save(model);
+        // La clave privada ya no se usará para firmar: se retira de memoria.
+        rsaBssaService.unloadKeys(expired.getId());
+        return expired;
     }
 }

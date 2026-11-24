@@ -1,4 +1,5 @@
 package authorization.repository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,7 +44,14 @@ public class BlindSignaturePublicKeyRepositoryAdapter implements BlindSignatureP
             .map(blindSignaturePublicKeyMapper::toModel);
     }
 
-    @Override 
+    @Override
+    public List<BlindSignaturePublicKeyModel> findAllByStatus(KeyStatus status) {
+        return jpaBlindSignaturePublicKeyRepository.findAllByStatus(status).stream()
+            .map(blindSignaturePublicKeyMapper::toModel)
+            .toList();
+    }
+
+    @Override
     public boolean existsByElectionId(UUID electionId) {
         return jpaBlindSignaturePublicKeyRepository.existsByElectionId(electionId);
     }

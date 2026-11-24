@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,11 @@ import com.voting_system.tally_service.crypto.ElGamalAcumulator;
 import com.voting_system.tally_service.crypto.ElGamalDecryptor;
 import com.voting_system.tally_service.exception.ElectionAlreadyTalliedException;
 import com.voting_system.tally_service.exception.ElectionNotClosedException;
+import com.voting_system.tally_service.exception.InvalidKeyStateException;
 import com.voting_system.tally_service.model.ElectionResultModel;
+import com.voting_system.tally_service.model.EncryptionKeyModel;
+import com.voting_system.tally_service.model.KeyStatus;
+import com.voting_system.tally_service.repository.EncryptionKeyRepositoryAdapter;
 import com.voting_system.tally_service.repository.ElectionResultRepositoryPort;
 import com.voting_system.tally_service.repository.PrivateEncryptionKeyRepository;
 
@@ -37,6 +42,7 @@ class TallyServiceTest {
     private ElGamalDecryptor elGamalDecryptor;
     private PrivateEncryptionKeyRepository privateEncryptionKeyRepository;
     private ElectionResultRepositoryPort electionResultRepository;
+    private EncryptionKeyRepositoryAdapter encryptionKeyRepository;
     private TallyService tallyService;
 
     private final UUID electionId = UUID.randomUUID();
@@ -50,14 +56,22 @@ class TallyServiceTest {
         elGamalDecryptor = mock(ElGamalDecryptor.class);
         privateEncryptionKeyRepository = mock(PrivateEncryptionKeyRepository.class);
         electionResultRepository = mock(ElectionResultRepositoryPort.class);
+        encryptionKeyRepository = mock(EncryptionKeyRepositoryAdapter.class);
+        givenEncryptionKeyStatus(KeyStatus.ACTIVE);
         tallyService = new TallyService(
             bulletinBoardServiceClient,
             electionServiceClient,
             mock(ElGamalAcumulator.class),
             elGamalDecryptor,
             privateEncryptionKeyRepository,
-            electionResultRepository
+            electionResultRepository,
+            encryptionKeyRepository
         );
+    }
+
+    private void givenEncryptionKeyStatus(KeyStatus status) {
+        when(encryptionKeyRepository.findByElectionId(electionId)).thenReturn(Optional.of(
+            EncryptionKeyModel.builder().electionId(electionId).status(status).build()));
     }
 
     private void givenElectionStatus(ElectionStatus status) {
@@ -116,6 +130,18 @@ class TallyServiceTest {
         verify(electionResultRepository, never()).saveAll(anyList());
         verify(privateEncryptionKeyRepository, never()).readPrivateKey(any());
         verify(electionServiceClient, never()).getElectionStructureDto(any());
+    }
+
+    @Test
+    void conClaveDeCifradoExpiradaNoSeDescifra() {
+        givenElectionStatus(ElectionStatus.CLOSED);
+        when(electionResultRepository.existsByElectionId(electionId)).thenReturn(false);
+        givenEncryptionKeyStatus(KeyStatus.EXPIRED);
+
+        assertThrows(InvalidKeyStateException.class, () -> tallyService.voteTallying(electionId));
+
+        verify(privateEncryptionKeyRepository, never()).readPrivateKey(any());
+        verify(electionResultRepository, never()).saveAll(anyList());
     }
 
     @Test

@@ -105,6 +105,8 @@ services:
       POSTGRES_USER: ${AUTHZ_DB_USER}
       POSTGRES_PASSWORD: ${AUTHZ_DB_PASSWORD}
       APP_KEYS_DIRECTORY: /data/keys
+      # Estado de las elecciones: no firmar fuera del periodo y expirar las claves al cierre.
+      ELECTION_SERVICE_BASE_URL: http://election-service:8083
     volumes:
       # Claves privadas RSA (firma ciega), fuera de la carpeta del repositorio.
       - ${KEYS_DIR}/authorization:/data/keys
