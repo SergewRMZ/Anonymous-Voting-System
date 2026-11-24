@@ -11,7 +11,7 @@ import authorization.domain.model.BlindSignatureModel;
 @AllArgsConstructor 
 @Builder 
 public class BlindSignatureResponse {
-    private UUID authoritizationKeysId;
+    private UUID authorizationKeysId;
     private UUID electionId;
     private UUID userId;
     private String blindSignature;
@@ -19,7 +19,7 @@ public class BlindSignatureResponse {
 
     public static BlindSignatureResponse from(BlindSignatureModel blindSignatureModel) {
         return new BlindSignatureResponse(
-            blindSignatureModel.getId(),
+            blindSignatureModel.getAuthorizationKeysId(),
             blindSignatureModel.getElectionId(),
             blindSignatureModel.getUserId(),
             blindSignatureModel.getBlindSignature(),

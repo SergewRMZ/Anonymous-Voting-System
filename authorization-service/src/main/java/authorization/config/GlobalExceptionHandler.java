@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CreatedKeyAlreadyExistsException.class)
     public ProblemDetail handleCreatedKeyAlreadyExistsException(CreatedKeyAlreadyExistsException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-            HttpStatus.SERVICE_UNAVAILABLE, 
+            HttpStatus.CONFLICT,
             ex.getMessage()
         );
 
