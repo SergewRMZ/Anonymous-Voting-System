@@ -43,6 +43,11 @@ public class SecurityConfig {
                 ).hasRole(UserRoles.AUTHORITY.name())
 
                 .requestMatchers(
+                    HttpMethod.PATCH,
+                    "/api/tally-service/elections/*/encryption-keys/expire"
+                ).hasRole(UserRoles.AUTHORITY.name())
+
+                .requestMatchers(
                     HttpMethod.POST,
                     "/api/tally-service/elections/*/tallies"
                 ).hasRole(UserRoles.AUTHORITY.name())
